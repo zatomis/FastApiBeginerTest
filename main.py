@@ -25,7 +25,9 @@ def put_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
     return {"status": "OK"}
 
 
-@app.patch("/hotels/{hotel_id}")
+@app.patch("/hotels/{hotel_id}",
+          summary="Частичное обновление",
+          description="<H1>Обновить данный об объекте</H1>")
 def patch_hotel(hotel_id: int, title: str | None = Body(), name: str | None = Body()):
     global hotels
     for hotel in hotels:
