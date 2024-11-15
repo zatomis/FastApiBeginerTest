@@ -1,4 +1,5 @@
 from fastapi import Query, Body, APIRouter
+from pydantic import BaseModel
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
@@ -6,10 +7,16 @@ hotels = [
     {"id": 3, "title": "Moscow", "name": "moscow"},
 ]
 
-router = APIRouter(prefix='/hotesl')
+router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
 
 
-@router.put("/{hotel_id}")
+class Hotel(BaseModel):
+    title: str
+    name: str
+
+@router.put("/{hotel_id}",
+            summary="Полное обновление данных",
+            description="<H1>Обновить данные об объекте</H1>")
 def put_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
     global hotels
     for hotel in hotels:
@@ -25,7 +32,7 @@ def put_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
 
 @router.patch("/{hotel_id}",
            summary="Частичное обновление",
-           description="<H1>Обновить данный об объекте</H1>")
+           description="<H1>Обновить данные об объекте</H1>")
 def patch_hotel(hotel_id: int, title: str | None = Body(), name: str | None = Body()):
     global hotels
     for hotel in hotels:
@@ -38,27 +45,31 @@ def patch_hotel(hotel_id: int, title: str | None = Body(), name: str | None = Bo
     return {"status": "OK"}
 
 
-@router.post("/")
-def create_hotel(
-        title: str = Body(embed=True),
-):
+@router.post("/",
+           summary="Добавить данные",
+           description="<H1>Добавить отель</H1>")
+def create_hotel(hotel_data: Hotel):
     global hotels
     hotels.append({
         "id": hotels[-1]["id"] + 1,
         "title": title,
-        "name": str(title).lower()
+        "name": str(name).lower()
     })
     return {"status": "OK"}
 
 
-@router.delete("/{hotel_id}")
+@router.delete("/{hotel_id}",
+           summary="Удаление",
+           description="<H1>Удалить данные об объекте</H1>")
 def delete_hotel(hotel_id: int):
     global hotels
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
     return {"status": "OK"}
 
 
-@router.get("")
+@router.get("",
+           summary="Получить отели",
+           description="<H1>Получить данные об объекте(ах)</H1>")
 def get_hotels(
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
