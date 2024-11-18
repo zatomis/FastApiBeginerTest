@@ -7,6 +7,9 @@ hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
     {"id": 2, "title": "Dubay", "name": "dubay"},
     {"id": 3, "title": "Moscow", "name": "moscow"},
+    {"id": 4, "title": "Kazan", "name": "kazan"},
+    {"id": 5, "title": "Rostov", "name": "rostov"},
+    {"id": 6, "title": "Krosnodar", "name": "krd"},
 ]
 
 router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
@@ -85,6 +88,8 @@ def delete_hotel(hotel_id: int):
 def get_hotels(
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
+        page: int | None = Query(1, description="Страница"),
+        page_quantity: int | None= Query(3, description="Кол-во"),
 ):
     hotels_ = []
     for hotel in hotels:
@@ -93,4 +98,8 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    return hotels_
+    if hotels_:
+        return hotels_[page:page_quantity]
+    else:
+        return {"status": "Empty"}
+
