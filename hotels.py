@@ -86,8 +86,8 @@ def delete_hotel(hotel_id: int):
            summary="Получить отели",
            description="<H1>Получить данные об объекте(ах)</H1>")
 def get_hotels(
-        page: int | None = Query(1, description="Страница"),
-        per_page: int | None = Query(3, description="Кол-во"),
+        page: int | None = Query(1, gte=1, description="Страница"),
+        per_page: int | None = Query(3, lt= 10, description="Кол-во"),
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
 ):
@@ -98,7 +98,9 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    if page and per_page: #если параметры есть, то
-        return hotels_[per_page * (page-1) :][page:per_page] #вернуть страницы с учетом того что уже могли бы быть страницы ранее
+
+    if page and per_page: #если параметры есть
+        # , то
+        return hotels_[per_page * (page-1) :][:per_page] #вернуть страницы с учетом того что уже могли бы быть страницы ранее
     else:
         return hotels_ #если их нет-вернуть всё
