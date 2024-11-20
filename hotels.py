@@ -1,5 +1,7 @@
-from fastapi import Query, APIRouter, Body
+from fastapi import Query, APIRouter, Body, Depends
+from typing import Annotated #это для своей типизации т.к. pydantic не связан с fastapi, но fastapi наоборот связан-это нужно чтобы правильно сделать Query
 
+from dependencies import PaginationParams
 from schemas.hotels import Hotel, HotelPatch
 
 
@@ -86,8 +88,8 @@ def delete_hotel(hotel_id: int):
            summary="Получить отели",
            description="<H1>Получить данные об объекте(ах)</H1>")
 def get_hotels(
-        page: int | None = Query(1, gte=1, description="Страница"),
-        per_page: int | None = Query(3, lt= 10, description="Кол-во"),
+        paginations: Annotated[PaginationParams, Depends()], #прокинуть в зависимости 2-а параметра page per_page
+        # paginations: PaginationParams,
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
 ):
@@ -99,8 +101,8 @@ def get_hotels(
             continue
         hotels_.append(hotel)
 
-    if page and per_page: #если параметры есть
+    if paginations.page and paginations.per_page: #если параметры есть
         # , то
-        return hotels_[per_page * (page-1) :][:per_page] #вернуть страницы с учетом того что уже могли бы быть страницы ранее
+        return hotels_[paginations.per_page * (paginations.page-1) :][:paginations.per_page] #вернуть страницы с учетом того что уже могли бы быть страницы ранее
     else:
         return hotels_ #если их нет-вернуть всё
