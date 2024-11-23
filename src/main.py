@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
-from hotels import router as router_hotels
+
+import sys
+from pathlib import Path
+#это для того, чтобы питон верно нашел и запустил основной файл !!!
+#добавить эту папку в пути-чтобы интерпритатор работал
+sys.path.append(str(Path(__file__).parent.parent))
+
+from src.api.hotels import router as router_hotels
 
 
 app = FastAPI(docs_url=None)

@@ -1,8 +1,8 @@
 from fastapi import Query, APIRouter, Body, Depends
 from typing import Annotated #это для своей типизации т.к. pydantic не связан с fastapi, но fastapi наоборот связан-это нужно чтобы правильно сделать Query
 
-from dependencies import PaginationParams
-from schemas.hotels import Hotel, HotelPatch
+from src.api.dependencies import PaginationParamsDep
+from src.schemas.hotels import Hotel, HotelPatch
 
 
 hotels = [
@@ -88,8 +88,7 @@ def delete_hotel(hotel_id: int):
            summary="Получить отели",
            description="<H1>Получить данные об объекте(ах)</H1>")
 def get_hotels(
-        paginations: Annotated[PaginationParams, Depends()], #прокинуть в зависимости 2-а параметра page per_page
-        # paginations: PaginationParams,
+        paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
 ):
