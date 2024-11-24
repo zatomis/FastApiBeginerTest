@@ -11,7 +11,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 from src.api.hotels import router as router_hotels
 from src.config import settings
 
-print(f"{settings.DB_NAME=}")
+print(f"{settings.DB_URL=}")
+
 
 app = FastAPI(docs_url=None)
 app.include_router(router_hotels)
