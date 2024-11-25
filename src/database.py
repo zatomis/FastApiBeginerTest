@@ -7,7 +7,7 @@ engine = create_async_engine(settings.DB_URL)
 
 new_async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
 
-class BaseModel(DeclarativeBase):
+class BaseModelORM(DeclarativeBase):
     """
     все данные о всех моделях
     """
