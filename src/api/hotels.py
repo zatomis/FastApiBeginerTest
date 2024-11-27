@@ -1,5 +1,4 @@
-from fastapi import Query, APIRouter, Body, Depends
-from typing import Annotated #это для своей типизации т.к. pydantic не связан с fastapi, но fastapi наоборот связан-это нужно чтобы правильно сделать Query
+from fastapi import Query, APIRouter, Body
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy import insert
@@ -7,7 +6,7 @@ from sqlalchemy import insert
 from src.api.dependencies import PaginationParamsDep
 from src.models.hotels import HotelsORM
 from src.schemas.hotels import Hotel, HotelPatch
-
+from src.database import new_async_session_maker
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
@@ -59,19 +58,19 @@ def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
 async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     "1": {"summary": "Сочи",
           "value":
-              {"title": "Отель Сочи 5зв.",
-               "name": "sochi"}
+              {"title": "Отель Морское Сочи 5зв.",
+               "location": "ул.Моря 152А"}
           },
-    "2": {"summary": "Княжий отель",
+    "2": {"summary": "Княжий отель в степи",
           "value":
-              {"title": "Khan hotel",
-               "name": "loga"}
+              {"title": "Княжий отель в степи",
+               "location": "пер. Степной 18"}
           },
 
 })
 ):
     #откр.транзакцию
-    async with async_sessionmaker() as session:
+    async with new_async_session_maker() as session:
         add_hotel_statement = insert(HotelsORM).values(**hotel_data.model_dump()) #тут из pydantic раскрывем в словарь, который вставим в БД
         await session.execute(add_hotel_statement)
         await session.commit()
