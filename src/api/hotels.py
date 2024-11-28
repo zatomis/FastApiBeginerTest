@@ -6,7 +6,7 @@ from sqlalchemy import insert
 from src.api.dependencies import PaginationParamsDep
 from src.models.hotels import HotelsORM
 from src.schemas.hotels import Hotel, HotelPatch
-from src.database import new_async_session_maker
+from src.database import new_async_session_maker, engine
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
@@ -72,6 +72,8 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     #откр.транзакцию
     async with new_async_session_maker() as session:
         add_hotel_statement = insert(HotelsORM).values(**hotel_data.model_dump()) #тут из pydantic раскрывем в словарь, который вставим в БД
+        # print(add_hotel_statement.compile(compile_kwargs={"Literal_binds": True}))
+        print(add_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         await session.execute(add_hotel_statement)
         await session.commit()
 
