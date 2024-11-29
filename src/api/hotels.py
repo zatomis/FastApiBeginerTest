@@ -83,14 +83,17 @@ async def get_hotels(
         id: int | None = Query(None, description="Просто id"),
         title: str | None = Query(None, description="Название отеля"),
 ):
-    async with new_async_session_maker() as session:
-        limit = paginations.page
-        offset = paginations.per_page * (paginations.page - 1)
+    per_page = paginations.per_page or 3
+    async with (new_async_session_maker() as session):
+        query_hotel_statement = select(HotelsORM)
+        if id:
+            query_hotel_statement = query_hotel_statement.filter_by(id=id)
+        if title:
+            query_hotel_statement = query_hotel_statement.filter_by(title=title)
         query_hotel_statement = (
-            select(HotelsORM)
-            .filter_by(id=id, title=title)
-            .limit(limit)
-            .offset(offset)
+            query_hotel_statement
+            .limit(per_page)
+            .offset(per_page * (paginations.page - 1))
         )
         print(query_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await session.execute(query_hotel_statement)
