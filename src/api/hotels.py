@@ -80,16 +80,17 @@ def delete_hotel(hotel_id: int):
            description="<H1>Получить данные об объекте(ах)</H1>")
 async def get_hotels(
         paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
-        id: int | None = Query(None, description="Просто id"),
+        # id: int | None = Query(None, description="Просто id"),
+        location: str | None = Query(None, description="Местоположение отеля"),
         title: str | None = Query(None, description="Название отеля"),
 ):
     per_page = paginations.per_page or 3
     async with (new_async_session_maker() as session):
         query_hotel_statement = select(HotelsORM)
-        if id:
-            query_hotel_statement = query_hotel_statement.filter_by(id=id)
+        if location:
+            query_hotel_statement = query_hotel_statement.where(HotelsORM.location.like(f'%{location}%'))
         if title:
-            query_hotel_statement = query_hotel_statement.filter_by(title=title)
+            query_hotel_statement = query_hotel_statement.where(HotelsORM.title.like(f'%{title}%'))
         query_hotel_statement = (
             query_hotel_statement
             .limit(per_page)
