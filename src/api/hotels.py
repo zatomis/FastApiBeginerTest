@@ -88,9 +88,9 @@ async def get_hotels(
     async with (new_async_session_maker() as session):
         query_hotel_statement = select(HotelsORM)
         if location:
-            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.location).like(f'%{location.lower()}%'))
+            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.location).like(f'%{location.strip().lower()}%'))
         if title:
-            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.title).like(f'%{title.lower()}%'))
+            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.title).like(f'%{title.strip().lower()}%'))
         query_hotel_statement = (
             query_hotel_statement
             .limit(per_page)
