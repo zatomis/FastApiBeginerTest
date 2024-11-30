@@ -1,7 +1,10 @@
 from fastapi import Query, APIRouter, Body
 from sqlalchemy import insert, select, func
+from sqlalchemy.util import await_only
+
 from src.api.dependencies import PaginationParamsDep
 from src.models.hotels import HotelsORM
+from src.repositories.hotels import HotelRepository
 from src.schemas.hotels import Hotel, HotelPatch
 from src.database import new_async_session_maker, engine
 
@@ -80,24 +83,27 @@ def delete_hotel(hotel_id: int):
            description="<H1>Получить данные об объекте(ах)</H1>")
 async def get_hotels(
         paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
-        # id: int | None = Query(None, description="Просто id"),
         location: str | None = Query(None, description="Местоположение отеля"),
         title: str | None = Query(None, description="Название отеля"),
 ):
-    per_page = paginations.per_page or 3
     async with (new_async_session_maker() as session):
-        query_hotel_statement = select(HotelsORM)
-        if location:
-            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.location).like(f'%{location.strip().lower()}%'))
-        if title:
-            query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.title).like(f'%{title.strip().lower()}%'))
-        query_hotel_statement = (
-            query_hotel_statement
-            .limit(per_page)
-            .offset(per_page * (paginations.page - 1))
-        )
-        print(query_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
-        query_result = await session.execute(query_hotel_statement)
+        return await HotelRepository(session).get_all()
 
-        hotels = query_result.scalars().all() #из кортежей-> объекты отели
-        return hotels
+
+    # per_page = paginations.per_page or 3
+    # async with (new_async_session_maker() as session):
+    #     query_hotel_statement = select(HotelsORM)
+    #     if location:
+    #         query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.location).like(f'%{location.strip().lower()}%'))
+    #     if title:
+    #         query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.title).like(f'%{title.strip().lower()}%'))
+    #     query_hotel_statement = (
+    #         query_hotel_statement
+    #         .limit(per_page)
+    #         .offset(per_page * (paginations.page - 1))
+    #     )
+    #     print(query_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
+    #     query_result = await session.execute(query_hotel_statement)
+    #
+    #     hotels = query_result.scalars().all() #из кортежей-> объекты отели
+    #     return hotels
