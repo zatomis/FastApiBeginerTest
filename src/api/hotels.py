@@ -1,5 +1,6 @@
 from fastapi import Query, APIRouter, Body
 from sqlalchemy import insert, select, func
+from sqlalchemy.sql.functions import session_user
 from sqlalchemy.util import await_only
 
 from src.api.dependencies import PaginationParamsDep
@@ -43,6 +44,32 @@ def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
     return {"status": "OK"}
 
 
+@router.delete("/{hotel_id}",
+           summary="Удаление",
+           description="<H1>Удалить данные об объекте</H1>")
+def delete_hotel(hotel_id: int):
+    global hotels
+    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+    return {"status": "OK"}
+
+
+@router.get("",
+           summary="Получить отели",
+           description="<H1>Получить данные об объекте(ах)</H1>")
+async def get_hotels(
+        paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
+        location: str | None = Query(None, description="Местоположение отеля"),
+        title: str | None = Query(None, description="Название отеля"),
+):
+    per_page = paginations.per_page or 3
+    async with (new_async_session_maker() as session):
+        return await HotelRepository(session).get_all(
+            location = location,
+            title = title,
+            limit = per_page,
+            offset = (per_page * (paginations.page - 1))
+        )
+
 @router.post("/",
            summary="Добавить данные",
            description="<H1>Добавить отель</H1>")
@@ -62,48 +89,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 ):
     #откр.транзакцию
     async with new_async_session_maker() as session:
-        add_hotel_statement = insert(HotelsORM).values(**hotel_data.model_dump()) #тут из pydantic раскрывем в словарь, который вставим в БД
-        print(add_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
-        await session.execute(add_hotel_statement)
+        print(hotel_data.model_dump())
+        hotel = await HotelRepository(session).add(hotel_data.model_dump())
         await session.commit()
-    return {"status": "OK"}
-
-
-@router.delete("/{hotel_id}",
-           summary="Удаление",
-           description="<H1>Удалить данные об объекте</H1>")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"status": "OK"}
-
-
-@router.get("",
-           summary="Получить отели",
-           description="<H1>Получить данные об объекте(ах)</H1>")
-async def get_hotels(
-        paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
-        location: str | None = Query(None, description="Местоположение отеля"),
-        title: str | None = Query(None, description="Название отеля"),
-):
-    async with (new_async_session_maker() as session):
-        return await HotelRepository(session).get_all()
-
-
-    # per_page = paginations.per_page or 3
-    # async with (new_async_session_maker() as session):
-    #     query_hotel_statement = select(HotelsORM)
-    #     if location:
-    #         query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.location).like(f'%{location.strip().lower()}%'))
-    #     if title:
-    #         query_hotel_statement = query_hotel_statement.where(func.lower(HotelsORM.title).like(f'%{title.strip().lower()}%'))
-    #     query_hotel_statement = (
-    #         query_hotel_statement
-    #         .limit(per_page)
-    #         .offset(per_page * (paginations.page - 1))
-    #     )
-    #     print(query_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
-    #     query_result = await session.execute(query_hotel_statement)
-    #
-    #     hotels = query_result.scalars().all() #из кортежей-> объекты отели
-    #     return hotels
+    return {"status": "OK", "data": hotel}
