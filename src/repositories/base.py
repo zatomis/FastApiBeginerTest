@@ -26,13 +26,14 @@ class BaseRepository:
         result = await self.session.execute(add_statement)
         return result.scalars().one() #по результату итерируемся и вызывая метод-возвр.результат
 
+
     async def remove(self, id: int):
         del_statement = delete(self.model).where(self.model.id == id)
         print(del_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(del_statement)
 
-    async def edit(self, data: BaseModel, filter_id):
 
+    async def edit(self, data: BaseModel, filter_id):
         update_statement = (
             update(self.model).
             where(self.model.id == filter_id).
