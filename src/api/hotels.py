@@ -16,16 +16,10 @@ router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
 @router.put("/{hotel_id}",
             summary="Полное обновление данных",
             description="<H1>Обновить данные об объекте</H1>")
-def put_hotel(hotel_id: int, hotel_data: Hotel):
-    global hotels
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            hotel["title"] = hotel_data.title
-            hotel["name"] = hotel_data.name
-            break
-    else:
-        return {"status": "Error id"}
-
+async def put_hotel(hotel_id: int, hotel_data: Hotel):
+    async with new_async_session_maker() as session:
+        await HotelRepository(session).edit(hotel_data, hotel_id)
+        await session.commit()
     return {"status": "OK"}
 
 
@@ -47,10 +41,12 @@ def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
 @router.delete("/{hotel_id}",
            summary="Удаление",
            description="<H1>Удалить данные об объекте</H1>")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"status": "OK"}
+async def delete_hotel(hotel_id: int):
+    async with new_async_session_maker() as session:
+        hotel = await HotelRepository(session).remove(hotel_id)
+        await session.commit()
+
+    return {"status": "OK", "data": hotel}
 
 
 @router.get("",
@@ -89,7 +85,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 ):
     #откр.транзакцию
     async with new_async_session_maker() as session:
-        print(f"словарик\n{hotel_data.model_dump()}")
-        hotel = await HotelRepository(session).add(hotel_data.model_dump())
+        hotel = await HotelRepository(session).add(hotel_data)
         await session.commit()
+
     return {"status": "OK", "data": hotel}

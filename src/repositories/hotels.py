@@ -28,9 +28,3 @@ class HotelRepository(BaseRepository):
         print(query_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_hotel_statement)
         return query_result.scalars().all() #из кортежей-> объекты отели
-
-    async def add(self, dict_data):
-        add_hotel_statement = self.model.__table__.insert().values(dict_data)
-        print(add_hotel_statement.compile(engine, compile_kwargs={"literal_binds": True}))
-        result = await self.session.execute(add_hotel_statement)
-        return result
