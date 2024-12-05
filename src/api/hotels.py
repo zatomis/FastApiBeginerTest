@@ -18,7 +18,7 @@ router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
             description="<H1>Обновить данные об объекте</H1>")
 async def put_hotel(hotel_id: int, hotel_data: Hotel):
     async with new_async_session_maker() as session:
-        await HotelRepository(session).edit(hotel_data, hotel_id)
+        await HotelRepository(session).edit(hotel_data, id=hotel_id)
         await session.commit()
     return {"status": "OK"}
 
@@ -26,15 +26,10 @@ async def put_hotel(hotel_id: int, hotel_data: Hotel):
 @router.patch("/{hotel_id}",
            summary="Частичное обновление",
            description="<H1>Обновить данные об объекте</H1>")
-def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
-    global hotels
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            if hotel_data.title:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name:
-                hotel["name"] = hotel_data.name
-            break
+async def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
+    async with new_async_session_maker() as session:
+        await HotelRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
     return {"status": "OK"}
 
 
@@ -43,9 +38,17 @@ def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
            description="<H1>Удалить данные об объекте</H1>")
 async def delete_hotel(hotel_id: int):
     async with new_async_session_maker() as session:
-        hotel = await HotelRepository(session).remove(hotel_id)
+        await HotelRepository(session).remove(id=hotel_id)
         await session.commit()
+    return {"status": "OK"}
 
+
+@router.get("/{hotel_id}",
+            summary="Запрос",
+            description="<H1>Получить данные об одном отели по id</H1>")
+async def get_by_id(hotel_id: int):
+    async with (new_async_session_maker() as session):
+        hotel = await HotelRepository(session).get_one_or_none(id=hotel_id)
     return {"status": "OK", "data": hotel}
 
 
@@ -87,5 +90,4 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
     async with new_async_session_maker() as session:
         hotel = await HotelRepository(session).add(hotel_data)
         await session.commit()
-
     return {"status": "OK", "data": hotel}

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from sqlalchemy import select, insert, delete, update
+from sqlalchemy.sql.operators import filter_op
+
 from src.database import engine
 
 
@@ -27,17 +29,17 @@ class BaseRepository:
         return result.scalars().one() #по результату итерируемся и вызывая метод-возвр.результат
 
 
-    async def remove(self, id: int):
-        del_statement = delete(self.model).where(self.model.id == id)
+    async def remove(self, **filter_by) -> None:
+        del_statement = delete(self.model).filter_by(**filter_by)
         print(del_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(del_statement)
 
 
-    async def edit(self, data: BaseModel, filter_id):
+    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
         update_statement = (
             update(self.model).
-            where(self.model.id == filter_id).
-            values(data.dict(exclude_unset=True))
+            filter_by(**filter_by).
+            values(**data.model_dump(exclude_unset=exclude_unset))
         )
         print(update_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(update_statement)
