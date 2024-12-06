@@ -1,12 +1,7 @@
 from fastapi import Query, APIRouter, Body
-from sqlalchemy import insert, select, func
-from sqlalchemy.sql.functions import session_user
-from sqlalchemy.util import await_only
-
 from src.api.dependencies import PaginationParamsDep
-from src.models.hotels import HotelsORM
 from src.repositories.hotels import HotelRepository
-from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
+from src.schemas.hotels import HotelPatch, HotelAdd
 from src.database import new_async_session_maker, engine
 
 
