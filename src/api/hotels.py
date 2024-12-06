@@ -6,7 +6,7 @@ from sqlalchemy.util import await_only
 from src.api.dependencies import PaginationParamsDep
 from src.models.hotels import HotelsORM
 from src.repositories.hotels import HotelRepository
-from src.schemas.hotels import Hotel, HotelPatch
+from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
 from src.database import new_async_session_maker, engine
 
 
@@ -16,7 +16,7 @@ router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
 @router.put("/{hotel_id}",
             summary="Полное обновление данных",
             description="<H1>Обновить данные об объекте</H1>")
-async def put_hotel(hotel_id: int, hotel_data: Hotel):
+async def put_hotel(hotel_id: int, hotel_data: HotelAdd):
     async with new_async_session_maker() as session:
         await HotelRepository(session).edit(hotel_data, id=hotel_id)
         await session.commit()
@@ -72,7 +72,7 @@ async def get_hotels(
 @router.post("/",
            summary="Добавить данные",
            description="<H1>Добавить отель</H1>")
-async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: HotelAdd = Body(openapi_examples={
     "1": {"summary": "Сочи",
           "value":
               {"title": "Отель Морское Сочи 5зв.",

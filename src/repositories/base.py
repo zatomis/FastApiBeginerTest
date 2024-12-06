@@ -3,10 +3,13 @@ from sqlalchemy import select, insert, delete, update
 from sqlalchemy.sql.operators import filter_op
 
 from src.database import engine
+from src.schemas.hotels import Hotel
 
 
 class BaseRepository:
     model = None
+    schema: BaseModel = None
+
     def __init__(self, session):
         self.session = session
 
@@ -14,19 +17,26 @@ class BaseRepository:
         query_statement = select(self.model)
         print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
-        return query_result.scalars().all()  # из кортежей-> объекты отели
+        #прошли по результату и преобразуем каждый элемент в схему pydantic т.о. выполняем DataMapper
+        return [self.schema.model_validate(obj_model, from_attributes=True) for obj_model in query_result.scalars().all()]
+
 
     async def get_one_or_none(self, **filter_by):
         query_statement = select(self.model).filter_by(**filter_by)
         print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
-        return query_result.scalars().one_or_none()
+        model = query_result.scalars().one_or_none()
+        if model is None:
+            return None
+        return self.schema.model_validate(model, from_attributes=True)
+
 
     async def add(self, data: BaseModel):
         add_statement = insert(self.model).values(**data.model_dump()).returning(self.model) #или .returning(self.model.id)-т.е. можно и одно поле
         print(add_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(add_statement)
-        return result.scalars().one() #по результату итерируемся и вызывая метод-возвр.результат
+        model = result.scalars().one() #по результату итерируемся и вызывая метод-возвр.результат
+        return self.schema.model_validate(model, from_attributes=True)
 
 
     async def remove(self, **filter_by) -> None:
