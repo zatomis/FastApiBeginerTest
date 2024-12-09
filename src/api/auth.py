@@ -65,5 +65,4 @@ async def only_auth(
         token = await get_access_token(request)
         return {"status": "OK", "Token": token}
     except Exception as err:
-        print(f'could not print REQUEST: {err}')
-        return {"status": "ERR"}
+        return {"status": "ERR", "Error": err}
