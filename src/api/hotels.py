@@ -5,7 +5,7 @@ from src.schemas.hotels import HotelPatch, HotelAdd
 from src.database import new_async_session_maker, engine
 
 
-router = APIRouter(prefix='/hotesl', tags=["Отели 🏨"])
+router = APIRouter(prefix='/hotels', tags=["Отели 🏨"])
 
 
 @router.put("/{hotel_id}",
@@ -63,6 +63,7 @@ async def get_hotels(
             limit = per_page,
             offset = (per_page * (paginations.page - 1))
         )
+
 
 @router.post("/",
            summary="Добавить данные",
