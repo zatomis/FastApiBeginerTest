@@ -13,12 +13,17 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_all(self, *args, **kwargs):
-        query_statement = select(self.model)
+
+    async def get_filter(self, **filter):
+        query_statement = select(self.model).filter_by(**filter)
         print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
         #прошли по результату и преобразуем каждый элемент в схему pydantic т.о. выполняем DataMapper
         return [self.schema.model_validate(obj_model, from_attributes=True) for obj_model in query_result.scalars().all()]
+
+
+    async def get_all(self, *args, **kwargs):
+        return await self.get_filter()
 
 
     async def get_one_or_none(self, **filter_by):

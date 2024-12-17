@@ -8,9 +8,9 @@ from pathlib import Path
 #добавить эту папку в пути-чтобы интерпритатор работал
 sys.path.append(str(Path(__file__).parent.parent))
 
+from src.api.auth import router as router_auth
 from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
-from src.api.auth import router as router_auth
 
 
 app = FastAPI(docs_url=None)
