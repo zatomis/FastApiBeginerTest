@@ -1,8 +1,6 @@
 from fastapi import Query, APIRouter, Body
 from src.api.dependencies import PaginationParamsDep, DBDep
-from src.repositories.hotels import HotelRepository
 from src.schemas.hotels import HotelPatch, HotelAdd
-from src.database import new_async_session_maker
 
 
 router = APIRouter(prefix='/hotels', tags=["Отели 🏨"])
@@ -15,7 +13,7 @@ async def put_hotel(hotel_id: int,
                     hotel_data: HotelAdd,
                     db: DBDep,):
     await db.hotels.edit(hotel_data, id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -26,7 +24,7 @@ async def patch_hotel(hotel_id: int,
                       hotel_data: HotelPatch,
                       db: DBDep):
     await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -35,7 +33,7 @@ async def patch_hotel(hotel_id: int,
                description="<H1>Удалить данные об объекте</H1>")
 async def delete_hotel(hotel_id: int, db: DBDep):
     await db.hotels.remove(id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -84,5 +82,5 @@ async def create_hotel(db: DBDep,
 })
 ):
     hotel = await db.hotels.add(hotel_data)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK", "data": hotel}

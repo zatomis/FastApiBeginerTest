@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Body
 from src.api.dependencies import DBDep
-from src.repositories.rooms import RoomsRepository
-from src.database import new_async_session_maker
 from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddRequest, RoomPatchRequest
 
-router = APIRouter(prefix='/hotels', tags=["Номера 🏪"])
+router = APIRouter(prefix='/hotels', tags=["Номера 🏬"])
 
 
 @router.get("/{hotel_id}/rooms",
@@ -30,7 +28,7 @@ async def delete_room_in_hotel(hotel_id: int,
                                room_id: int,
                                db: DBDep):
     await db.rooms.remove(hotel_id=hotel_id, id=room_id)
-    await db.rooms.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -44,7 +42,7 @@ async def put_room_in_hotel(hotel_id: int,
     _room_data = RoomAdd(hotel_id=hotel_id,
                          **room_data.model_dump()) #т.е. создали другую схему
     await db.rooms.edit(_room_data, id=room_id)
-    await db.rooms.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -60,7 +58,7 @@ async def patch_room(hotel_id: int,
                         exclude_unset=True,
                         hotel_id=hotel_id,
                         id=room_id)
-    await db.rooms.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
@@ -74,5 +72,5 @@ async def create_room(hotel_id: int,
     _room_data = RoomAdd(hotel_id=hotel_id,
                          **room_data.model_dump()) #т.е. создали другую схему
     room = await db.rooms.add(_room_data)
-    await db.rooms.commit()
+    await db.commit()
     return {"status": "OK", "data": room}

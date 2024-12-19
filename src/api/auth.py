@@ -1,9 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response
 from starlette.responses import RedirectResponse
-
 from src.api.dependencies import UserIdDep, DBDep
-from src.database import new_async_session_maker
-from src.repositories.users import UsersRepository
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthService
 
@@ -21,7 +18,7 @@ async def register_user(
     if email is None:
         new_user_data = UserAdd(email=data.email, password=hashed_passwd, name=data.name)
         user = await db.users.add(new_user_data)
-        await db.users.commit()
+        await db.commit()
         return {"status": "OK", "data": user}
     else:
         return {"status": "Error. Dublicate Email !!!",
