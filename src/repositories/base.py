@@ -14,8 +14,12 @@ class BaseRepository:
         self.session = session
 
 
-    async def get_filter(self, **filter):
-        query_statement = select(self.model).filter_by(**filter)
+    async def get_filter(self, *filter, **filter_by):
+        query_statement = (
+            select(self.model)
+            .filter(*filter)
+            .filter_by(**filter_by)
+        )
         print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
         #прошли по результату и преобразуем каждый элемент в схему pydantic т.о. выполняем DataMapper
