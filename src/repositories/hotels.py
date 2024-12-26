@@ -44,14 +44,27 @@ class HotelRepository(BaseRepository):
                                  limit,
                                  offset,
                                  date_from: date,
-                                 date_to: date):
-
+                                 date_to: date)-> list[Hotel]:
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
         hotels_ids = (
             select(RoomsORM.hotel_id)
             .select_from(RoomsORM)
             .filter(RoomsORM.id.in_(rooms_ids_to_get))
         )
+        query_hotel_statement = select(HotelsORM).filter(HotelsORM.id.in_(hotels_ids))
+        if location:
+            query_hotel_statement = query_hotel_statement.where(
+                func.lower(HotelsORM.location).like(f'%{location.strip().lower()}%'))
+        if title:
+            query_hotel_statement = query_hotel_statement.where(
+                func.lower(HotelsORM.title).like(f'%{title.strip().lower()}%'))
 
-        return await self.get_filter(HotelsORM.id.in_(hotels_ids))
+        query_hotel_statement = (
+            query_hotel_statement
+            .limit(limit)
+            .offset(offset)
+        )
+        print(query_hotel_statement.compile(compile_kwargs={"literal_binds": True}))
+        result = await self.session.execute(query_hotel_statement)
 
+        return [Hotel.model_validate(hotel, from_attributes=True) for hotel in result.scalars().all()]
