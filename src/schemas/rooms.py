@@ -6,6 +6,8 @@ class RoomAddRequest(BaseModel):
     description: str | None = None #если поле опиционально-то обязательно должно быть значение для него задано
     price: int
     quantity: int
+    # facilities_ids: list[int] | None = None #массив id удобств
+    facilities_ids: list[int] = []
 
 
 class RoomAdd(RoomAddRequest):

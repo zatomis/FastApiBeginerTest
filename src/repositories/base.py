@@ -40,6 +40,11 @@ class BaseRepository:
         return self.schema.model_validate(model, from_attributes=True)
 
 
+    async def add_bulk(self, data: list[BaseModel]): #принимаем массив список схем
+        add_bulk_statement = insert(self.model).values([item.model_dump() for item in data]) #каждую схемку -> в словарик
+        await self.session.execute(add_bulk_statement)
+
+
     async def add(self, data: BaseModel):
         add_statement = insert(self.model).values(**data.model_dump()).returning(self.model) #или .returning(self.model.id)-т.е. можно и одно поле
         print(add_statement.compile(engine, compile_kwargs={"literal_binds": True}))

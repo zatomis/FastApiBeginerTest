@@ -11,7 +11,6 @@ router = APIRouter(prefix='/facilities', tags=["Удобства 🚽"])
             summary="Удобства",
             description="<H1>Получить данные об удобствах</H1>")
 async def get_facilities(db: DBDep):
-
     faclities = await db.facilities.get_all()
     return {"status": "OK", "data": faclities}
 
@@ -19,7 +18,7 @@ async def get_facilities(db: DBDep):
 @router.post("/",
            summary="Добавить удобства для номеров",
            description="<H1>Добавить удобства для номеров</H1>")
-async def create_room(db: DBDep,
+async def create_facility(db: DBDep,
                       faclities_data: FaclitiesAdd = Body()):
     faclities = await db.facilities.add(faclities_data)
     await db.commit()
