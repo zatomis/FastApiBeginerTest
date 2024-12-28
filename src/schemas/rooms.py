@@ -10,7 +10,11 @@ class RoomAddRequest(BaseModel):
     facilities_ids: list[int] = []
 
 
-class RoomAdd(RoomAddRequest):
+class RoomAdd(BaseModel):
+    title: str
+    description: str | None = None #если поле опиционально-то обязательно должно быть значение для него задано
+    price: int
+    quantity: int
     hotel_id: int
 
 
