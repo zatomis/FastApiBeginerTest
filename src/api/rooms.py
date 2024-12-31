@@ -1,10 +1,10 @@
 from datetime import date
 from fastapi import APIRouter, Body, Query
 from sqlalchemy.exc import IntegrityError
-
+from fastapi import Response
 from src.api.dependencies import DBDep
 from src.schemas.facilities import RoomFaclityAdd
-from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddRequest, RoomPatchRequest
+from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatchWithFacilities
 
 router = APIRouter(prefix='/hotels', tags=["Номера 🏬"])
 
@@ -27,7 +27,10 @@ async def get_room(hotel_id: int,
                    room_id: int,
                    db: DBDep):
     room = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
-    return {"status": "OK", "data": room}
+    facilities = await db.rooms_facilities.get_filter(room_id=room.id)
+    data_room = {"data": room}
+    data_room["facilities"] = [facilities_room.facility_id for facilities_room in facilities]
+    return {"status": "OK", "room":data_room}
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}",
@@ -51,6 +54,13 @@ async def put_room_in_hotel(hotel_id: int,
     _room_data = RoomAdd(hotel_id=hotel_id,
                          **room_data.model_dump()) #т.е. создали другую схему
     await db.rooms.edit(_room_data, id=room_id)
+    #удалить все удобства
+    await db.rooms_facilities.remove(room_id=room_id)
+    #добавить новые
+    rooms_facilities = [RoomFaclityAdd(room_id=room_id,
+                                       facility_id=f_id)
+                        for f_id in room_data.facilities_ids]
+    await db.rooms_facilities.add_bulk(rooms_facilities)
     await db.commit()
     return {"status": "OK"}
 
@@ -61,12 +71,45 @@ async def put_room_in_hotel(hotel_id: int,
 async def patch_room(hotel_id: int,
                      room_id: int,
                      db: DBDep,
-                     room_data: RoomPatchRequest):
+                     # room_data: RoomPatchRequest): было так
+                     room_data: RoomPatchWithFacilities):
     _room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True)) #exclude_unset-для того чтобы можно было бы делать только 1 поле
     await db.rooms.edit(_room_data,
                         exclude_unset=True,
                         hotel_id=hotel_id,
                         id=room_id)
+    patch_facilities = set(room_data.facilities_ids)
+    current_facilities = set([cf.facility_id for cf in await db.rooms_facilities.get_filter(room_id=room_id)])
+    # находим пересечение,
+    # если путое,
+    #  то удалить те что есть и добавить все новые удобства
+    # иначе
+    #  из текущих вычитаем результат пересечения и это удаляем
+    #  а из исходных вычитая результат пересечения - их добавить
+    intersection = patch_facilities & current_facilities
+    if intersection:
+        facilities_for_delete = list(current_facilities - intersection)
+        rooms_facilities_del = [RoomFaclityAdd(room_id=room_id,
+                                           facility_id=f_id)
+                            for f_id in facilities_for_delete]
+        # await db.rooms_facilities.remove_bulk(rooms_facilities_del)
+        for facilities_del in rooms_facilities_del:
+            await db.rooms_facilities.remove(room_id=room_id, facility_id=facilities_del.facility_id)
+
+        facilities_add_new = list(patch_facilities - intersection)
+        rooms_facilities_add = [RoomFaclityAdd(room_id=room_id,
+                                           facility_id=f_id)
+                            for f_id in facilities_add_new]
+        await db.rooms_facilities.add_bulk(rooms_facilities_add)
+    else:
+        # удалить те что были ранее т.к. их нет в запросе
+        await db.rooms_facilities.remove(room_id=room_id)
+        # добавить новые из запроса
+        rooms_facilities = [RoomFaclityAdd(room_id=room_id,
+                                           facility_id=f_id)
+                            for f_id in room_data.facilities_ids]
+        await db.rooms_facilities.add_bulk(rooms_facilities)
+
     await db.commit()
     return {"status": "OK"}
 
@@ -91,4 +134,4 @@ async def create_room(hotel_id: int,
         await db.commit()
         return {"status": "OK", "data": rooms_facilities}
     except IntegrityError:
-        return {"status": "Bad"}
+        return Response({"msg": "Указанные удобства не найдены..."}, status_code=404)

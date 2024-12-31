@@ -6,7 +6,6 @@ class RoomAddRequest(BaseModel):
     description: str | None = None #если поле опиционально-то обязательно должно быть значение для него задано
     price: int
     quantity: int
-    # facilities_ids: list[int] | None = None #массив id удобств
     facilities_ids: list[int] = []
 
 
@@ -26,10 +25,14 @@ class Room(RoomAdd):
 
 class RoomPatchRequest(BaseModel):
     title: str | None = None
-    description: str | None = None #т.е. опиционально
+    description: str | None = None #т.е. опционально
     price: int | None = None
     quantity: int | None = None
 
 
 class RoomPatch(RoomPatchRequest):
     hotel_id: int | None = None
+
+class RoomPatchWithFacilities(RoomPatchRequest):
+    facilities_ids: list[int] = []
+

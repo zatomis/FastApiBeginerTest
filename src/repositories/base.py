@@ -59,6 +59,12 @@ class BaseRepository:
         await self.session.execute(del_statement)
 
 
+    async def remove_bulk(self, **filter_by):
+        # remove_bulk_statement = delete(self.model).values([item.model_dump() for item in data]) #каждую схемку -> в словарик
+        remove_bulk_statement = delete(self.model).filter_by(**filter_by)
+        await self.session.execute(remove_bulk_statement)
+
+
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
         update_statement = (
             update(self.model).
