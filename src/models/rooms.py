@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, SmallInteger
 
 from src.database import BaseModelORM
+# from src.models.facilities import FacilitiesORM
 
 
 class RoomsORM(BaseModelORM):
@@ -13,3 +14,9 @@ class RoomsORM(BaseModelORM):
     description: Mapped[str | None] #опциональный параметр
     price: Mapped[int]
     quantity: Mapped[int]
+
+    #это не столбец,а описание связи с таблицей М2М
+    facilities: Mapped[list["FacilitiesORM"]] = relationship(
+        back_populates="rooms",
+        secondary="rooms_facilities"
+    )
