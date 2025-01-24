@@ -1,4 +1,4 @@
-import redis_connector.asyncio as redis
+import redis.asyncio as redis
 
 
 class RedisManager:
