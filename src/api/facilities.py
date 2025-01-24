@@ -1,10 +1,7 @@
-import json
-from datetime import date
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body, Query
 from src.api.dependencies import DBDep
 from src.schemas.facilities import FaclitiesAdd
-from src.setup import redis_manager
 
 router = APIRouter(prefix='/facilities', tags=["Удобства 🚽"])
 
@@ -12,21 +9,23 @@ router = APIRouter(prefix='/facilities', tags=["Удобства 🚽"])
 @router.get("/",
             summary="Удобства",
             description="<H1>Получить данные об удобствах</H1>")
+@cache(expire=10)
 async def get_facilities(db: DBDep):
-    #пример на обычном Redis без плагинов
-    faclities_from_cashe = await redis_manager.get("facilities")
-    if not faclities_from_cashe:
-        faclities = await db.facilities.get_all()
-        #т.к Redis работает с строками - преобразуем
-        #faclities-список PyDantic схем, то их преобразуем к списку словарей,
-        #а потом в json
-        faclities_schemas: list[dict] = [f.model_dump() for f in faclities]
-        faclities_json = json.dumps(faclities_schemas)
-        await redis_manager.set("facilities", faclities_json, 10)
-        return faclities
-    else:
-        faclities_dicts = json.loads(faclities_from_cashe)
-        return faclities_dicts
+    # #пример на обычном Redis без плагинов
+    # faclities_from_cashe = await redis_manager.get("facilities")
+    # if not faclities_from_cashe:
+    #     faclities = await db.facilities.get_all()
+    #     #т.к Redis работает с строками - преобразуем
+    #     #faclities-список PyDantic схем, то их преобразуем к списку словарей,
+    #     #а потом в json
+    #     faclities_schemas: list[dict] = [f.model_dump() for f in faclities]
+    #     faclities_json = json.dumps(faclities_schemas)
+    #     await redis_manager.set("facilities", faclities_json, 10)
+    #     return faclities
+    # else:
+    #     faclities_dicts = json.loads(faclities_from_cashe)
+    #     return faclities_dicts
+    return await db.facilities.get_all()
 
 
 @router.post("/",
