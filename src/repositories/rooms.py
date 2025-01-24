@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from src.models.rooms import RoomsORM
 from src.repositories.base import BaseRepository
 from src.repositories.utils import rooms_ids_for_booking
@@ -24,5 +24,19 @@ class RoomsRepository(BaseRepository):
         )
         res = await self.session.execute(query)
         return [RoomWithRelationShip.model_validate(model) for model in res.unique().scalars().all()]
+
+
+    async def get_one_or_none_with_relations(self, **filter_by):
+        query_statement = (
+            select(self.model)
+            .options(selectinload(self.model.facilities))
+            .filter_by(**filter_by)
+        )
+        query_result = await self.session.execute(query_statement)
+        model = query_result.scalars().one_or_none()
+        if model is None:
+            return None
+        return RoomWithRelationShip.model_validate(model, from_attributes=True)
+
 
 

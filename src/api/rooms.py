@@ -26,11 +26,8 @@ async def get_rooms(
 async def get_room(hotel_id: int,
                    room_id: int,
                    db: DBDep):
-    room = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
-    facilities = await db.rooms_facilities.get_filter(room_id=room.id)
-    data_room = {"data": room}
-    data_room["facilities"] = [facilities_room.facility_id for facilities_room in facilities]
-    return {"status": "OK", "room":data_room}
+    room = await db.rooms.get_one_or_none_with_relations(hotel_id=hotel_id, id=room_id)
+    return {"status": "OK", "room": room}
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}",
