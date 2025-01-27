@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.bin.celery import celery
 
 from src.config import settings
 
@@ -11,3 +12,6 @@ celery_app_task_instance = Celery(
     ],
 
 )
+
+# запуск Celery
+# celery --app=src.tasks.celery_app:celery_app_task_instance worker -l INFO
