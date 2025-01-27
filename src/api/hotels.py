@@ -1,5 +1,5 @@
 from datetime import date
-
+from fastapi_cache.decorator import cache
 from fastapi import Query, APIRouter, Body
 from src.api.dependencies import PaginationParamsDep, DBDep
 from src.schemas.hotels import HotelPatch, HotelAdd
@@ -42,6 +42,7 @@ async def delete_hotel(hotel_id: int, db: DBDep):
 @router.get("/{hotel_id}",
             summary="Запрос",
             description="<H1>Получить данные об одном отели по id</H1>")
+@cache(expire=30)
 async def get_by_id(hotel_id: int, db: DBDep):
     hotel = await db.hotels.get_one_or_none(id=hotel_id)
     return {"status": "OK", "data": hotel}
@@ -50,6 +51,7 @@ async def get_by_id(hotel_id: int, db: DBDep):
 @router.get("",
            summary="Получить отели",
            description="<H1>Получить данные об объекте(ах)</H1>")
+@cache(expire=30)
 async def get_hotels(
         paginations: PaginationParamsDep, #прокинуть в зависимости 2-а параметра page per_page
         db: DBDep,
