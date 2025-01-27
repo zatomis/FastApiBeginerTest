@@ -1,3 +1,4 @@
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from src.config import settings
@@ -12,7 +13,10 @@ from src.config import settings
 
 # engine = create_async_engine(settings.DB_URL, echo=True)
 engine = create_async_engine(settings.DB_URL, )
+engine_null_pull = create_async_engine(settings.DB_URL, poolclass=NullPool) #единичное соединение для celery
+
 new_async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
+new_async_session_maker_null_pool = async_sessionmaker(bind=engine_null_pull, expire_on_commit=False)
 
 class BaseModelORM(DeclarativeBase):
     """

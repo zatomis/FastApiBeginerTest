@@ -13,11 +13,13 @@ class BookingsRepository(BaseRepository):
 
     async def get_bookings_with_today_checkin(self):
         query = (
-            select(BookingsORM)
-            .filter(BookingsORM.date_from == date.today())
+            select(self.model)
+            .filter(self.model.date_from == date.today())
         )
-        res = self.session.execute(query)
-        # return [self.schema.model_validate(booking, from_attributes=True) for booking in res.scalars().all()]
-        return res
+        res = await self.session.execute(query)
+        return [self.schema.model_validate(booking, from_attributes=True) for booking in res.scalars().all()]
+
+
+
 
 
