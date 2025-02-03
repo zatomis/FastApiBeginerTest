@@ -1,5 +1,6 @@
 #спец файл для того чтобы при каждом прогоне
 #тестов выполнялся. Файл настроечный - основной настроечный
+import json
 
 import pytest
 from src.config import settings
@@ -39,16 +40,25 @@ async def register_user(setup_DB_main):
 
 #т.е запускать при каждом прогоне теста
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(register_user):
-    print("Создание тестовых данных")
-    async with AsyncClient(app=app, base_url="http://testuser") as ac:
-        await ac.post(
-            "/auth/register",
-            json={
-                "email": "abc@mail.ru",
-                "password": "123987",
-                "name": "Test user"
-            }
-        )
+async def add_test_data(register_user):
+    print("Создание тестовых данных - отелей")
+    async with AsyncClient(app=app, base_url="http://testhotel") as ac:
+        with open('tests/hotel.json') as f:
+            for item in json.loads(f.read()):
+                await ac.post(
+                    "/hotels/",
+                    json=item
+                )
+
+    async with AsyncClient(app=app, base_url="http://testhotel") as ac:
+        with open('tests/rooms.json') as f:
+            rooms_for_hotel = json.loads(f.read())
+            for item in rooms_for_hotel:
+                hotel_id = item['hotel_id']
+                del item['hotel_id']
+                await ac.post(
+                    f"/{hotel_id}/rooms",
+                    json=item
+                )
 
     
