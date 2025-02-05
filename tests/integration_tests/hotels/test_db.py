@@ -1,13 +1,11 @@
 from pprint import pprint
-
-from src.database import new_async_session_maker_null_pool
 from src.schemas.hotels import HotelAdd
-from src.utils.db_manager import DBManager
 
 
-async def test_add_hotel():
+#тут передаем фикстуру, которая делает подключение к БД
+#и тогда функция ниже - уже будет внутри контекстного менеджера
+async def test_add_hotel(db):
     hotel_data = HotelAdd(title="Hotel 3 stars", location="Сочи")
-    async with DBManager(session_factory=new_async_session_maker_null_pool) as db:
-        new_hotel = await db.hotels.add(hotel_data)
-        pprint(f"f{new_hotel=}")
-        await db.commit()
+    new_hotel = await db.hotels.add(hotel_data)
+    pprint(f"f{new_hotel=}")
+    await db.commit()
