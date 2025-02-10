@@ -1,7 +1,15 @@
 #спец файл для того чтобы при каждом прогоне
 #тестов выполнялся. Файл настроечный - основной настроечный
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+
 import json
+from pprint import pprint
+
 import pytest
+
+from src.api.dependencies import get_db
 from src.config import settings
 from src.database import BaseModelORM, engine_null_pull, new_async_session_maker_null_pool
 from src.main import app
@@ -19,6 +27,16 @@ async def db() -> DBManager:
     async with DBManager(session_factory=new_async_session_maker_null_pool) as db:
         yield db
 
+
+async def get_db_null_pull() -> DBManager:
+    async with DBManager(session_factory=new_async_session_maker_null_pool) as db:
+        pprint("Перезаписан метод работы с БД")
+        yield db
+
+#для тестов чтобы не было ошибок-необходимо подменить обращение к БД
+#это необходимо для теста, который делает API запрос
+#и там достаточно "пустого" подключения. Ниже через метод подменяем на новую функцию
+app.dependency_overrides[get_db] = get_db_null_pull
 
 @pytest.fixture(scope="session", autouse=True)
 async def check_test_mode():

@@ -11,8 +11,13 @@ from src.config import settings
 # После запуска команд не забудьть открыть новый SQL скрипт/редактор
 
 
+# db_params = {}
+# if settings.MODE == "TEST":
+#     db_params = {"poolclass": NullPool}
+
 # engine = create_async_engine(settings.DB_URL, echo=True)
-engine = create_async_engine(settings.DB_URL, )
+# engine = create_async_engine(settings.DB_URL, **db_params)
+engine = create_async_engine(settings.DB_URL)
 engine_null_pull = create_async_engine(settings.DB_URL, poolclass=NullPool) #единичное соединение для celery
 
 new_async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
