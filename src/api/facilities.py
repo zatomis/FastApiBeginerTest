@@ -10,7 +10,7 @@ router = APIRouter(prefix='/facilities', tags=["Удобства 🚽"])
 @router.get("/",
             summary="Удобства",
             description="<H1>Получить данные об удобствах</H1>")
-@cache(expire=10)
+# @cache(expire=10)
 async def get_facilities(db: DBDep):
     # #пример на обычном Redis без плагинов
     # faclities_from_cashe = await redis_manager.get("facilities")
