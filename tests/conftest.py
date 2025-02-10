@@ -101,5 +101,5 @@ async def autheticated_user_ac(ac, register_user):
         }
     )
     assert response.status_code == 200
-    return response.json()["access_token"]
+    yield ac
 
