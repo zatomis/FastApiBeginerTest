@@ -87,3 +87,19 @@ async def register_user(ac, setup_DB_main):
             "name": "Test user"
         }
     )
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def autheticated_user_ac(ac, register_user):
+    print("Login пользователя")
+    response = await ac.post(
+        "/auth/login",
+        json={
+            "email": "abc@mail.ru",
+            "password": "123987",
+            "name": "Test user"
+        }
+    )
+    assert response.status_code == 200
+    return response.json()["access_token"]
+
