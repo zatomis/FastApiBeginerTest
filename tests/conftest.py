@@ -100,6 +100,8 @@ async def autheticated_user_ac(ac, register_user):
             "name": "Test user"
         }
     )
-    assert response.status_code == 200
+    assert ac.cookies["access_token"]
+    #в куках - есть токен - его и вернуть
+    #т.е. он будет теперь доступен и далее в ac
     yield ac
 
