@@ -1,9 +1,5 @@
-from pprint import pprint
-
 import pytest
-
-from src.database import new_async_session_maker_null_pool
-from src.utils.db_manager import DBManager
+from tests.conftest import get_db_null_pull
 
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code",[
@@ -16,7 +12,6 @@ from src.utils.db_manager import DBManager
 async def test_add_booking(
         room_id, date_from, date_to, status_code,
         db, autheticated_user_ac):
-    # room_id = (await db.rooms.get_all())[0].id
     response = await autheticated_user_ac.post(
         "/bookings/",
         json={
@@ -33,31 +28,35 @@ async def test_add_booking(
         assert "data" in res
 
 
-
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 async def clear_DB_bookings(check_test_mode):
-    print("ФИКСТУРА на очистку бронирований")
-    async with DBManager(session_factory=new_async_session_maker_null_pool) as db_:
+    # print("ФИКСТУРА на очистку бронирований")
+    async for db_ in get_db_null_pull():
         await db_.bookings.remove()
         await db_.commit()
 
 
-
-@pytest.mark.parametrize("room_id, date_from, date_to, status_code",[
-    (1, "2024-02-01", "2024-02-03", 1),
-    (1, "2024-02-01", "2024-02-03", 2),
-    (1, "2024-02-01", "2024-02-03", 3),])
+@pytest.mark.parametrize("room_id, date_from, date_to, rooms_booked_number",[
+    (12, "2024-02-01", "2024-02-03", 1),
+    (12, "2024-02-01", "2024-02-03", 2),
+    (12, "2024-02-01", "2024-02-03", 3),])
 async def test_add_and_get_my_bookings(
-    clear_DB_bookings, db,
-    room_id, date_from, date_to, status_code,
-    autheticated_user_ac
+    room_id, date_from, date_to, rooms_booked_number,
+    autheticated_user_ac, clear_DB_bookings,
     ):
-    user = (await db.users.get_all())[0]
 
-    response = await autheticated_user_ac.get(
-        "/bookings/me",
-        params={
-            "user_id": user.id,
+    response = await autheticated_user_ac.post(
+        "/bookings/",
+        json={
+            "room_id": room_id,
+            "date_from": date_from,
+            "date_to": date_to,
         }
     )
-    pprint(f"{response.json()=}")
+    assert response.status_code == 200
+
+    response_my_bookings = await autheticated_user_ac.get(
+        "/bookings/me"
+    )
+    assert response_my_bookings.status_code == 200
+    assert len(response_my_bookings.json()) == rooms_booked_number
