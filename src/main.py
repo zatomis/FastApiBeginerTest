@@ -10,8 +10,8 @@ from src.setup import redis_manager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
-#это для того, чтобы питон верно нашел и запустил основной файл !!!
-#добавить эту папку в пути-чтобы интерпритатор работал
+# это для того, чтобы питон верно нашел и запустил основной файл !!!
+# добавить эту папку в пути-чтобы интерпритатор работал
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.auth import router as router_auth
@@ -24,16 +24,16 @@ from src.api.images import router as router_images
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #тут при старте
+    # тут при старте
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
 
     yield
-    #тут при закрытии
+    # тут при закрытии
     await redis_manager.close()
 
 
-#lifespan это функция - которая стартует и закрывается вместе с FA
+# lifespan это функция - которая стартует и закрывается вместе с FA
 app = FastAPI(docs_url=None, lifespan=lifespan)
 
 app.include_router(router_auth)
@@ -42,6 +42,7 @@ app.include_router(router_rooms)
 app.include_router(router_bookings)
 app.include_router(router_facilities)
 app.include_router(router_images)
+
 
 @app.get("/")
 def func():

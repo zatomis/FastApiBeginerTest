@@ -1,7 +1,7 @@
 """Таблицы в БД
 
 Revision ID: 993bd6116283
-Revises: 
+Revises:
 Create Date: 2024-12-06 16:32:41.386324
 
 """

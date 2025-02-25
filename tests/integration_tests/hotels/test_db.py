@@ -2,8 +2,8 @@ from pprint import pprint
 from src.schemas.hotels import HotelAdd
 
 
-#тут передаем фикстуру, которая делает подключение к БД
-#и тогда функция ниже - уже будет внутри контекстного менеджера
+# тут передаем фикстуру, которая делает подключение к БД
+# и тогда функция ниже - уже будет внутри контекстного менеджера
 async def test_add_hotel(db):
     hotel_data = HotelAdd(title="Hotel 3 stars", location="Сочи")
     new_hotel = await db.hotels.add(hotel_data)

@@ -12,8 +12,7 @@ class FacilitiesORM(BaseModelORM):
 
     # это не столбец,а описание связи с таблицей М2М
     rooms: Mapped[list["RoomsORM"]] = relationship(
-        back_populates="facilities",
-        secondary="rooms_facilities"
+        back_populates="facilities", secondary="rooms_facilities"
     )
 
 

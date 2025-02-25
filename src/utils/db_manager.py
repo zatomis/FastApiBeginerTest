@@ -1,6 +1,9 @@
-#для того чтобы уйти от контекстных менеджеров и сделать свой
+# для того чтобы уйти от контекстных менеджеров и сделать свой
 from src.repositories.bookings import BookingsRepository
-from src.repositories.facilities import FacilitiesRepository, RoomsFacilitiesRepository
+from src.repositories.facilities import (
+    FacilitiesRepository,
+    RoomsFacilitiesRepository,
+)
 from src.repositories.hotels import HotelRepository
 from src.repositories.rooms import RoomsRepository
 from src.repositories.users import UsersRepository

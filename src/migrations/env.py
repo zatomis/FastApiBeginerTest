@@ -1,4 +1,4 @@
-#ruff: noqa: F403
+# ruff: noqa: F403
 from logging.config import fileConfig
 
 from alembic.script import ScriptDirectory
@@ -10,13 +10,16 @@ from alembic import context
 from src.config import settings
 from src.database import BaseModelORM
 
-from src.models import * # noqa
+from src.models import *  # noqa
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-#для предачи переменной. которую зададим в файл ini
-config.set_main_option("sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True") #тут предача доп значения для того чтобы явно сказать движку-отработать синхронно т.к. миграции это синхр.процесс
+# для предачи переменной. которую зададим в файл ini
+config.set_main_option(
+    "sqlalchemy.url", f"{settings.DB_URL}?async_fallback=True"
+)  # тут предача доп значения для того чтобы явно сказать движку-отработать синхронно т.к. миграции это синхр.процесс
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -39,17 +42,20 @@ def process_revision_directives(context, revision, directives):
     # extract Migration
     migration_script = directives[0]
     # extract current head revision
-    head_revision = ScriptDirectory.from_config(context.config).get_current_head()
+    head_revision = ScriptDirectory.from_config(
+        context.config
+    ).get_current_head()
 
     if head_revision is None:
         # edge case with first migration
         new_rev_id = 1
     else:
         # default branch with incrementation
-        last_rev_id = int(head_revision.lstrip('0'))
+        last_rev_id = int(head_revision.lstrip("0"))
         new_rev_id = last_rev_id + 1
     # fill zeros up to 4 digits: 1 -> 0001
-    migration_script.rev_id = '{0:04}'.format(new_rev_id)
+    migration_script.rev_id = "{0:04}".format(new_rev_id)
+
 
 # then use it context.configure
 # context.configure(process_revision_directives = process_revision_directives,)

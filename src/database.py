@@ -18,16 +18,25 @@ from src.config import settings
 # engine = create_async_engine(settings.DB_URL, echo=True)
 # engine = create_async_engine(settings.DB_URL, **db_params)
 engine = create_async_engine(settings.DB_URL)
-engine_null_pull = create_async_engine(settings.DB_URL, poolclass=NullPool) #единичное соединение для celery
+engine_null_pull = create_async_engine(
+    settings.DB_URL, poolclass=NullPool
+)  # единичное соединение для celery
 
-new_async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
-new_async_session_maker_null_pool = async_sessionmaker(bind=engine_null_pull, expire_on_commit=False)
+new_async_session_maker = async_sessionmaker(
+    bind=engine, expire_on_commit=False
+)
+new_async_session_maker_null_pool = async_sessionmaker(
+    bind=engine_null_pull, expire_on_commit=False
+)
+
 
 class BaseModelORM(DeclarativeBase):
     """
     все данные о всех моделях
     """
+
     pass
+
 
 # session = new_async_session_maker()
 #     await session.execute()

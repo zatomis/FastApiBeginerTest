@@ -5,7 +5,9 @@ from src.schemas.facilities import Faclities
 
 class RoomAddRequest(BaseModel):
     title: str
-    description: str | None = None #если поле опиционально-то обязательно должно быть значение для него задано
+    description: str | None = (
+        None  # если поле опиционально-то обязательно должно быть значение для него задано
+    )
     price: int
     quantity: int
     facilities_ids: list[int] = []
@@ -13,7 +15,9 @@ class RoomAddRequest(BaseModel):
 
 class RoomAdd(BaseModel):
     title: str
-    description: str | None = None #если поле опиционально-то обязательно должно быть значение для него задано
+    description: str | None = (
+        None  # если поле опиционально-то обязательно должно быть значение для него задано
+    )
     price: int
     quantity: int
     hotel_id: int
@@ -21,8 +25,9 @@ class RoomAdd(BaseModel):
 
 class Room(RoomAdd):
     id: int
-    #параметр ниже для того чтобы легко приводить ответы алфимии к схеме Pydantic
+    # параметр ниже для того чтобы легко приводить ответы алфимии к схеме Pydantic
     model_config = ConfigDict(from_attributes=True)
+
 
 class RoomWithRelationShip(Room):
     facilities: list[Faclities]
@@ -30,7 +35,7 @@ class RoomWithRelationShip(Room):
 
 class RoomPatchRequest(BaseModel):
     title: str | None = None
-    description: str | None = None #т.е. опционально
+    description: str | None = None  # т.е. опционально
     price: int | None = None
     quantity: int | None = None
 
@@ -38,6 +43,6 @@ class RoomPatchRequest(BaseModel):
 class RoomPatch(RoomPatchRequest):
     hotel_id: int | None = None
 
+
 class RoomPatchWithFacilities(RoomPatchRequest):
     facilities_ids: list[int] = []
-

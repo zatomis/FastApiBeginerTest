@@ -2,8 +2,8 @@ from datetime import date
 from src.schemas.bookings import BookingAdd
 
 
-#тут передаем фикстуру db, которая делает подключение к БД
-#и тогда функция ниже - уже будет внутри контекстного менеджера
+# тут передаем фикстуру db, которая делает подключение к БД
+# и тогда функция ниже - уже будет внутри контекстного менеджера
 async def test_crud_booking(db):
     # Считаем кол-во данных до теста
     await db.bookings.get_one_or_none()

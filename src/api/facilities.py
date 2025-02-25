@@ -4,12 +4,12 @@ from src.api.dependencies import DBDep
 from src.schemas.facilities import FaclitiesAdd
 from src.tasks.task import test_task
 
-router = APIRouter(prefix='/facilities', tags=["Удобства 🚽"])
+router = APIRouter(prefix="/facilities", tags=["Удобства 🚽"])
 
 
-@router.get("/",
-            summary="Удобства",
-            description="<H1>Получить данные об удобствах</H1>")
+@router.get(
+    "/", summary="Удобства", description="<H1>Получить данные об удобствах</H1>"
+)
 @cache(expire=10)
 async def get_facilities(db: DBDep):
     # #пример на обычном Redis без плагинов
@@ -29,11 +29,12 @@ async def get_facilities(db: DBDep):
     return await db.facilities.get_all()
 
 
-@router.post("/",
-           summary="Добавить удобства для номеров",
-           description="<H1>Добавить удобства для номеров</H1>")
-async def create_facility(db: DBDep,
-                      faclities_data: FaclitiesAdd = Body()):
+@router.post(
+    "/",
+    summary="Добавить удобства для номеров",
+    description="<H1>Добавить удобства для номеров</H1>",
+)
+async def create_facility(db: DBDep, faclities_data: FaclitiesAdd = Body()):
     faclities = await db.facilities.add(faclities_data)
     await db.commit()
     test_task.delay()

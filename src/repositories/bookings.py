@@ -14,14 +14,14 @@ class BookingsRepository(BaseRepository):
     schema = Booking
 
     async def get_bookings_with_today_checkin(self):
-        query = (
-            select(self.model)
-            .filter(self.model.date_from == date.today())
-        )
+        query = select(self.model).filter(self.model.date_from == date.today())
         res = await self.session.execute(query)
-        return [self.schema.model_validate(booking, from_attributes=True) for booking in res.scalars().all()]
+        return [
+            self.schema.model_validate(booking, from_attributes=True)
+            for booking in res.scalars().all()
+        ]
 
-    async def add_booking(self, add_data:BookingAdd, hotel_id: int):
+    async def add_booking(self, add_data: BookingAdd, hotel_id: int):
         """
         Добавление бронирования с ограничением на свободные номера
         Как отдельный метод. В начале - делаем запрос
@@ -40,8 +40,3 @@ class BookingsRepository(BaseRepository):
             return new_booking
         else:
             raise HTTPException(500)
-
-
-
-
-
