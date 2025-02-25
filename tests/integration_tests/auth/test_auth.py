@@ -1,5 +1,6 @@
 from pprint import pprint
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.parametrize(
@@ -13,7 +14,7 @@ import pytest
         ("abcde@abc", "1235", 422),
     ],
 )
-async def test_auth_flow(email: str, password: str, status_code: int, ac):
+async def test_auth_flow(email: str, password: str, status_code: int, ac: AsyncClient):
     resp_register_user = await ac.post(
         "/auth/register",
         json={
@@ -72,7 +73,7 @@ async def my_test_register_user(ac):
     pprint(ac.cookies["access_token"])
 
 
-async def my_test_login_user_ac(ac):
+async def my_test_login_user_ac(ac: AsyncClient):
     print("Login пользователя")
     response = await ac.post(
         "/auth/login",
@@ -86,7 +87,7 @@ async def my_test_login_user_ac(ac):
     assert ac.cookies["access_token"]
 
 
-async def my_test_me(ac, db):
+async def my_test_me(ac: AsyncClient):
     response = await ac.get(
         "/auth/me",
         params={"email": "abcdef@mail.ru", "id": 1, "name": "Test user auth"},
@@ -95,7 +96,7 @@ async def my_test_me(ac, db):
     assert ac.cookies["access_token"]
 
 
-async def my_test_logout(ac):
+async def my_test_logout(ac: AsyncClient):
     response = await ac.get("/auth/logout")
     assert response.status_code == 200
     assert not ac.cookies["access_token"]

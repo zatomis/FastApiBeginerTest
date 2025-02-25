@@ -1,7 +1,7 @@
-from pprint import pprint
+from httpx import AsyncClient
 
 
-async def test_get_hotels(ac):
+async def test_get_hotels(ac: AsyncClient):
     response = await ac.get(
         "/hotels",
         params={
@@ -9,6 +9,4 @@ async def test_get_hotels(ac):
             "date_to": "2024-08-20",
         },
     )
-    pprint(f"{response=}")
-
     assert response.status_code == 200

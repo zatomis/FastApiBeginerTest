@@ -1,6 +1,7 @@
 # ruff : noqa: E402
 # спец файл для того чтобы при каждом прогоне
 # тестов выполнялся. Файл настроечный - основной настроечный
+from typing import AsyncGenerator
 from unittest import mock
 
 mock.patch(
@@ -30,14 +31,14 @@ from src.utils.db_manager import DBManager
 
 # фикстура, которая вернет подключение в БД
 @pytest.fixture(scope="function")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager, None]:
     async with DBManager(
         session_factory=new_async_session_maker_null_pool
     ) as db:
         yield db
 
 
-async def get_db_null_pull() -> DBManager:
+async def get_db_null_pull() -> AsyncGenerator[DBManager, None]:
     async with DBManager(
         session_factory=new_async_session_maker_null_pool
     ) as db:
@@ -85,14 +86,14 @@ async def setup_DB_main(check_test_mode):
 
 
 @pytest.fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(app=app, base_url="http://testuser") as ac:
         yield ac
 
 
 # т.е запускать при каждом прогоне теста
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(ac, setup_DB_main):
+async def register_user(ac: AsyncClient, setup_DB_main):
     print("Создание пользователя")
     await ac.post(
         "/auth/register",
@@ -105,7 +106,7 @@ async def register_user(ac, setup_DB_main):
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def autheticated_user_ac(ac, register_user):
+async def autheticated_user_ac(ac: AsyncClient, register_user):
     print("Login пользователя")
     await ac.post(
         "/auth/login",

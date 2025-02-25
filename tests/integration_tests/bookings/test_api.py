@@ -1,4 +1,7 @@
 import pytest
+from httpx import AsyncClient
+
+from src.utils.db_manager import DBManager
 from tests.conftest import get_db_null_pull
 
 
@@ -13,7 +16,7 @@ from tests.conftest import get_db_null_pull
     ],
 )
 async def test_add_booking(
-    room_id, date_from, date_to, status_code, db, autheticated_user_ac
+    room_id, date_from, date_to, status_code, db: DBManager, autheticated_user_ac: AsyncClient
 ):
     response = await autheticated_user_ac.post(
         "/bookings/",
@@ -52,7 +55,7 @@ async def test_add_and_get_my_bookings(
     date_from,
     date_to,
     rooms_booked_number,
-    autheticated_user_ac,
+    autheticated_user_ac: AsyncClient,
     clear_DB_bookings,
 ):
     response = await autheticated_user_ac.post(

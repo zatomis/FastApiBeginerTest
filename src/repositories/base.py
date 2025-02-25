@@ -1,13 +1,18 @@
 from pydantic import BaseModel
+from typing import Sequence, Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.database import BaseModelORM
 from sqlalchemy import select, insert, delete, update
 from src.database import engine
 
 
 class BaseRepository:
-    model = None
-    schema: BaseModel = None
+    model: type[BaseModelORM]
+    session: AsyncSession
 
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     async def get_filter(self, *filter, **filter_by):
@@ -43,7 +48,7 @@ class BaseRepository:
         return self.schema.model_validate(model, from_attributes=True)
 
     async def add_bulk(
-        self, data: list[BaseModel]
+        self, data: Sequence[BaseModel]
     ):  # принимаем массив список схем
         add_bulk_statement = insert(self.model).values(
             [item.model_dump() for item in data]
