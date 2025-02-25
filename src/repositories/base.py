@@ -2,10 +2,11 @@ from pydantic import BaseModel
 from typing import Sequence, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.exc import NoResultFound
 from src.database import BaseModelORM
 from sqlalchemy import select, insert, delete, update
 from src.database import engine
+from src.exceptions import ObjectNotFoundException
 
 
 class BaseRepository:
@@ -34,6 +35,7 @@ class BaseRepository:
     async def get_all(self, *args, **kwargs):
         return await self.get_filter()
 
+
     async def get_one_or_none(self, **filter_by):
         query_statement = select(self.model).filter_by(**filter_by)
         print(
@@ -46,6 +48,17 @@ class BaseRepository:
         if model is None:
             return None
         return self.schema.model_validate(model, from_attributes=True)
+
+
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+        return self.schema.model_validate(model, from_attributes=True)
+
 
     async def add_bulk(
         self, data: Sequence[BaseModel]
