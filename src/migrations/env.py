@@ -1,3 +1,4 @@
+#ruff: noqa: F403
 from logging.config import fileConfig
 
 from alembic.script import ScriptDirectory
@@ -9,7 +10,7 @@ from alembic import context
 from src.config import settings
 from src.database import BaseModelORM
 
-from src.models import *
+from src.models import * # noqa
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

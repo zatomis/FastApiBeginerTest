@@ -38,7 +38,7 @@ async def login_user(
 
     #проверим пароль юзера
     if not AuthService().verify_password(data.password, user.password):
-        raise HTTPException(status_code=401, detail=f"Пароль не верный ! ")
+        raise HTTPException(status_code=401, detail="Пароль не верный !")
 
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie("access_token", access_token)

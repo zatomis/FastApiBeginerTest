@@ -1,14 +1,12 @@
 from datetime import date
-from pprint import pprint
-
-from src.schemas.bookings import BookingAdd, Booking
+from src.schemas.bookings import BookingAdd
 
 
 #тут передаем фикстуру db, которая делает подключение к БД
 #и тогда функция ниже - уже будет внутри контекстного менеджера
 async def test_crud_booking(db):
     # Считаем кол-во данных до теста
-    booking_count = await db.bookings.get_one_or_none()
+    await db.bookings.get_one_or_none()
 
     # взять данные для теста из БД
     user = (await db.users.get_all())[0]

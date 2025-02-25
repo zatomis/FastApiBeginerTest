@@ -1,5 +1,5 @@
 from fastapi_cache.decorator import cache
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body
 from src.api.dependencies import DBDep
 from src.schemas.facilities import FaclitiesAdd
 from src.tasks.task import test_task

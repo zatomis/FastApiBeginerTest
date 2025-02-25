@@ -1,3 +1,4 @@
+# ruff : noqa: E402
 #спец файл для того чтобы при каждом прогоне
 #тестов выполнялся. Файл настроечный - основной настроечный
 from unittest import mock
@@ -13,7 +14,7 @@ from src.api.dependencies import get_db
 from src.config import settings
 from src.database import BaseModelORM, engine_null_pull, new_async_session_maker_null_pool
 from src.main import app
-from src.models import *
+from src.models import * # noqa
 from httpx import AsyncClient
 
 from src.schemas.hotels import HotelAdd
@@ -92,7 +93,7 @@ async def register_user(ac, setup_DB_main):
 @pytest.fixture(scope="session", autouse=True)
 async def autheticated_user_ac(ac, register_user):
     print("Login пользователя")
-    response = await ac.post(
+    await ac.post(
         "/auth/login",
         json={
             "email": "abc@mail.ru",

@@ -1,6 +1,4 @@
 from celery import Celery
-from celery.bin.celery import celery
-
 from src.config import settings
 
 

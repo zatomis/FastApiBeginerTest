@@ -1,9 +1,6 @@
 from pydantic import BaseModel
 from sqlalchemy import select, insert, delete, update
-from sqlalchemy.sql.operators import filter_op
-
 from src.database import engine
-from src.schemas.hotels import Hotel
 
 
 class BaseRepository:

@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import Response
 from src.api.dependencies import DBDep
 from src.schemas.facilities import RoomFaclityAdd
-from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatchWithFacilities
+from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddRequest, RoomPatchWithFacilities
 
 router = APIRouter(prefix='/hotels', tags=["Номера 🏬"])
 
