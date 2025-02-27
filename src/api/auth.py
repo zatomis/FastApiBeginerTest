@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
 from starlette.responses import RedirectResponse
 from src.api.dependencies import UserIdDep, DBDep
+from src.exceptions import ObjectAlreadyExistsException
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthService
 
@@ -10,17 +11,15 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 @router.post("/register")
 async def register_user(data: UserRequestAdd, db: DBDep):
     hashed_passwd = AuthService().hash_password(data.password)
-    email = await db.users.get_one_or_none(email=data.email)
-
-    if email is None:
-        new_user_data = UserAdd(
-            email=data.email, password=hashed_passwd, name=data.name
-        )
+    new_user_data = UserAdd(
+        email=data.email, password=hashed_passwd, name=data.name
+    )
+    try:
         user = await db.users.add(new_user_data)
         await db.commit()
-        return {"status": "OK", "data": user}
-    else:
-        return {"status": "Error. Dublicate Email !!!", "data": email}
+    except ObjectAlreadyExistsException:
+        raise HTTPException(status_code=409, detail="Пользователь с такой почтой уже существует")
+    return {"status": "OK", "data": user}
 
 
 @router.post("/login")

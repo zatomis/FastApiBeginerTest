@@ -1,12 +1,13 @@
+from asyncpg import UniqueViolationError
 from pydantic import BaseModel
 from typing import Sequence, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 from src.database import BaseModelORM
 from sqlalchemy import select, insert, delete, update
 from src.database import engine
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 
 
 class BaseRepository:
@@ -69,19 +70,26 @@ class BaseRepository:
         await self.session.execute(add_bulk_statement)
 
     async def add(self, data: BaseModel):
-        add_statement = (
-            insert(self.model).values(**data.model_dump()).returning(self.model)
-        )  # или .returning(self.model.id)-т.е. можно и одно поле
-        print(
-            add_statement.compile(
-                engine, compile_kwargs={"literal_binds": True}
-            )
-        )
-        result = await self.session.execute(add_statement)
-        model = (
-            result.scalars().one()
-        )  # по результату итерируемся и вызывая метод-возвр.результат
-        return self.schema.model_validate(model, from_attributes=True)
+        try:
+            add_statement = (
+                insert(self.model).values(**data.model_dump()).returning(self.model)
+            )  # или .returning(self.model.id)-т.е. можно и одно поле
+            # print(
+            #     add_statement.compile(
+            #         engine, compile_kwargs={"literal_binds": True}
+            #     )
+            # )
+            result = await self.session.execute(add_statement)
+            model = (
+                result.scalars().one()
+            )  # по результату итерируемся и вызывая метод-возвр.результат
+            return self.schema.model_validate(model, from_attributes=True)
+        except IntegrityError as ex:
+            print(f"{type(ex.orig.__cause__)=}")
+            if isinstance(ex.orig.__cause__, UniqueViolationError): #если классы ошибок совпали-то это именно про уникальность
+                raise ObjectAlreadyExistsException from ex
+            else:#иначе
+                raise ex
 
     async def remove(self, **filter_by) -> None:
         del_statement = delete(self.model).filter_by(**filter_by)
