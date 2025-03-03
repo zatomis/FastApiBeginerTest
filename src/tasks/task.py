@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from time import sleep
 
@@ -37,7 +38,7 @@ def resize_image(image_path: str):
         output_path = os.path.join(output_folder, new_file_name)
         # Сохраняем изображение
         img_resized.save(output_path)
-    print(
+    logging.info(
         f"Изображение сохранено в следующих размерах: {sizes} в папке {output_folder}"
     )
 

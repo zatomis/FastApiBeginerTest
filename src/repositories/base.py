@@ -1,7 +1,8 @@
+import logging
+
 from asyncpg import UniqueViolationError
 from pydantic import BaseModel
-from typing import Sequence, Any
-
+from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from src.database import BaseModelORM
@@ -39,7 +40,7 @@ class BaseRepository:
 
     async def get_one_or_none(self, **filter_by):
         query_statement = select(self.model).filter_by(**filter_by)
-        print(
+        logging.INFO(
             query_statement.compile(
                 engine, compile_kwargs={"literal_binds": True}
             )
@@ -85,15 +86,16 @@ class BaseRepository:
             )  # по результату итерируемся и вызывая метод-возвр.результат
             return self.schema.model_validate(model, from_attributes=True)
         except IntegrityError as ex:
-            print(f"{type(ex.orig.__cause__)=}")
+            logging.error(f"{type(ex.orig.__cause__)=}")
             if isinstance(ex.orig.__cause__, UniqueViolationError): #если классы ошибок совпали-то это именно про уникальность
                 raise ObjectAlreadyExistsException from ex
             else:#иначе
+                logging.error("Незанакомая ошибка...")
                 raise ex
 
     async def remove(self, **filter_by) -> None:
         del_statement = delete(self.model).filter_by(**filter_by)
-        print(
+        logging.info(
             del_statement.compile(
                 engine, compile_kwargs={"literal_binds": True}
             )
@@ -113,7 +115,7 @@ class BaseRepository:
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
         )
-        print(
+        logging.info(
             update_statement.compile(
                 engine, compile_kwargs={"literal_binds": True}
             )

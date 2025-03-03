@@ -13,6 +13,7 @@ from src.schemas.rooms import (
     RoomAddRequest,
     RoomPatchWithFacilities,
 )
+from src.services.room import RoomServiceLayer
 
 router = APIRouter(prefix="/hotels", tags=["Номера 🏬"])
 
@@ -28,11 +29,12 @@ async def get_rooms(
     date_from: date = Query(example="2024-10-18"),
     date_to: date = Query(example="2024-12-18"),
 ):
-    check_date_to_after_date_from(date_from, date_to)
-    room = await db.rooms.get_filter_by_time(
-        hotel_id=hotel_id, date_from=date_from, date_to=date_to
+    rooms = await RoomServiceLayer(db=db).get_filter_by_time(
+        hotel_id=hotel_id,
+        date_from=date_from,
+        date_to=date_to,
     )
-    return {"status": "OK", "data": room}
+    return {"status": "OK", "data": rooms}
 
 
 @router.get("/{hotel_id}/room/{room_id}")

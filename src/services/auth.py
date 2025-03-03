@@ -4,11 +4,12 @@ from fastapi import HTTPException
 from passlib.context import CryptContext
 import jwt
 from src.config import settings
+from src.services.base import BaseServiceLayer
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-class AuthService:
+class AuthService(BaseServiceLayer):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def create_access_token(self, data: dict) -> str:

@@ -1,18 +1,19 @@
+import logging
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
 from contextlib import asynccontextmanager
-
 import sys
 from pathlib import Path
-from src.setup import redis_manager
 
+from src.setup import redis_manager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 # это для того, чтобы питон верно нашел и запустил основной файл !!!
 # добавить эту папку в пути-чтобы интерпритатор работал
 sys.path.append(str(Path(__file__).parent.parent))
+logging.basicConfig(level=logging.INFO)
 
 from src.api.auth import router as router_auth
 from src.api.hotels import router as router_hotels
@@ -21,13 +22,12 @@ from src.api.bookings import router as router_bookings
 from src.api.facilities import router as router_facilities
 from src.api.images import router as router_images
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # тут при старте
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
-
+    logging.info("FastAPI cache initialized")
     yield
     # тут при закрытии
     await redis_manager.close()
