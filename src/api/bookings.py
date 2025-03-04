@@ -41,25 +41,7 @@ async def create_booking(
     db: DBDep, user_id: UserIdDep, booking_data: BookingAddRequest = Body()
 ):
     try:
-        hotel_id = await db.rooms.get_one_or_none(id=booking_data.room_id)
-        if hotel_id:
-            user = await db.users.get_one_or_none(id=user_id)
-            try:
-                room: Room = await db.rooms.get_one(id=booking_data.room_id)
-            except ObjectNotFoundException:
-                raise HTTPException(status_code=400, detail="Номер не найден")
-
-            hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
-            room_price = room.price
-            _booking_data = BookingAdd(
-                user_id=user.id, price=room_price, **booking_data.model_dump()
-            )
-            booking = await db.bookings.add_booking(
-                _booking_data, hotel_id=hotel.id
-            )
-            await db.commit()
-            return {"status": "OK", "data": booking}
-        else:
-            return {"status": "Bad", "data": hotel_id}
-    except jwt.ExpiredSignature or jwt.ExpiredSignatureError:
-        return {"status": "Bad"}
+        booking = await BookingServiceLayer(db).add_booking(user_id, booking_data)
+    except AllRoomsAreBookedException:
+        raise AllRoomsAreBookedHTTPException
+    return {"status": "OK", "data": booking}
