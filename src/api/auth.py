@@ -1,40 +1,32 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Response
 from starlette.responses import RedirectResponse
 from src.api.dependencies import UserIdDep, DBDep
-from src.exceptions import ObjectAlreadyExistsException
-from src.schemas.users import UserRequestAdd, UserAdd
+from src.schemas.users import UserRequestAdd
 from src.services.auth import AuthService
+from src.exceptions import IncorrectPasswordHTTPException, IncorrectPasswordException, \
+    EmailNotRegisteredHTTPException, EmailNotRegisteredException, UserAlreadyExistsException, \
+    UserEmailAlreadyExistsHTTPException
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
 
 @router.post("/register")
 async def register_user(data: UserRequestAdd, db: DBDep):
-    hashed_passwd = AuthService().hash_password(data.password)
-    new_user_data = UserAdd(
-        email=data.email, password=hashed_passwd, name=data.name
-    )
     try:
-        user = await db.users.add(new_user_data)
-        await db.commit()
-    except ObjectAlreadyExistsException:
-        raise HTTPException(status_code=409, detail="Пользователь с такой почтой уже существует")
-    return {"status": "OK", "data": user}
+        await AuthService(db).register_user(data)
+    except UserAlreadyExistsException:
+        raise UserEmailAlreadyExistsHTTPException
+    return {"status": "OK"}
 
 
 @router.post("/login")
 async def login_user(data: UserRequestAdd, response: Response, db: DBDep):
-    user = await db.users.get_user_hash_pwd(email=data.email)
-    if not user:
-        raise HTTPException(
-            status_code=401, detail=f"Нет такого пользователя с {data.email} ! "
-        )
-
-    # проверим пароль юзера
-    if not AuthService().verify_password(data.password, user.password):
-        raise HTTPException(status_code=401, detail="Пароль не верный !")
-
-    access_token = AuthService().create_access_token({"user_id": user.id})
+    try:
+        access_token = await AuthService(db).login_user(data)
+    except EmailNotRegisteredException:
+        raise EmailNotRegisteredHTTPException
+    except IncorrectPasswordException:
+        raise IncorrectPasswordHTTPException
     response.set_cookie("access_token", access_token)
     return {"access_token": access_token}
 
@@ -51,13 +43,11 @@ async def get_access_token(request):
 
 @router.get("/me")
 async def get_me(user_id: UserIdDep, db: DBDep):
-    return await db.users.get_one_or_none(id=user_id)
+    return await AuthService(db).get_one_or_none_user(user_id)
 
 
 @router.get("/logout")
-async def logout(
-    response: Response,
-):
+async def logout(response: Response,):
     response = RedirectResponse("/logout", status_code=302)
     response.delete_cookie(key="access_token")
     return response

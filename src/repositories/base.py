@@ -22,11 +22,7 @@ class BaseRepository:
         query_statement = (
             select(self.model).filter(*filter).filter_by(**filter_by)
         )
-        print(
-            query_statement.compile(
-                engine, compile_kwargs={"literal_binds": True}
-            )
-        )
+        # print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
         # прошли по результату и преобразуем каждый элемент в схему pydantic т.о. выполняем DataMapper
         return [
@@ -40,11 +36,7 @@ class BaseRepository:
 
     async def get_one_or_none(self, **filter_by):
         query_statement = select(self.model).filter_by(**filter_by)
-        logging.INFO(
-            query_statement.compile(
-                engine, compile_kwargs={"literal_binds": True}
-            )
-        )
+        # print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
         query_result = await self.session.execute(query_statement)
         model = query_result.scalars().one_or_none()
         if model is None:
@@ -89,8 +81,8 @@ class BaseRepository:
             logging.error(f"{type(ex.orig.__cause__)=}")
             if isinstance(ex.orig.__cause__, UniqueViolationError): #если классы ошибок совпали-то это именно про уникальность
                 raise ObjectAlreadyExistsException from ex
-            else:#иначе
-                logging.error("Незанакомая ошибка...")
+            else:
+                logging.error("Незанакомая ошибка", exc_info=ex)
                 raise ex
 
     async def remove(self, **filter_by) -> None:

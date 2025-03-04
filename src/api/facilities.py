@@ -2,6 +2,7 @@ from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body
 from src.api.dependencies import DBDep
 from src.schemas.facilities import FaclitiesAdd
+from src.services.facilities import FacilityServiceLayer
 from src.tasks.task import test_task
 
 router = APIRouter(prefix="/facilities", tags=["Удобства 🚽"])
@@ -26,7 +27,7 @@ async def get_facilities(db: DBDep):
     # else:
     #     faclities_dicts = json.loads(faclities_from_cashe)
     #     return faclities_dicts
-    return await db.facilities.get_all()
+    return await FacilityServiceLayer(db).get_facilities()
 
 
 @router.post(

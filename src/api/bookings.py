@@ -4,6 +4,10 @@ from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import ObjectNotFoundException
 from src.schemas.bookings import BookingAddRequest, BookingAdd
 from src.schemas.rooms import Room
+from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
+from src.schemas.bookings import BookingAddRequest
+from src.services.bookings import BookingServiceLayer
+
 
 router = APIRouter(prefix="/bookings", tags=["Бронирование 🏪"])
 
@@ -14,7 +18,7 @@ router = APIRouter(prefix="/bookings", tags=["Бронирование 🏪"])
     description="<H1>Получить данные о бронировании</H1>",
 )
 async def get_booking(db: DBDep):
-    booking = await db.bookings.get_all()
+    booking = await BookingServiceLayer(db).get_bookings()
     return {"status": "Ok", "data": booking}
 
 
@@ -24,8 +28,7 @@ async def get_booking(db: DBDep):
     description="<H1>Получить данные о бронировании номеров пользователя</H1>",
 )
 async def get_booking_me(user_id: UserIdDep, db: DBDep):
-    user = await db.users.get_one_or_none(id=user_id)
-    booking = await db.bookings.get_filter(user_id=user.id)
+    booking = await BookingServiceLayer(db).get_my_bookings(user_id)
     return {"status": "Ok", "data": booking}
 
 
