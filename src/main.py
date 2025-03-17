@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 import sys
 from pathlib import Path
 
-from src.setup import redis_manager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
@@ -15,6 +14,7 @@ from fastapi_cache.backends.redis import RedisBackend
 sys.path.append(str(Path(__file__).parent.parent))
 logging.basicConfig(level=logging.INFO)
 
+from src.setup import redis_manager
 from src.api.auth import router as router_auth
 from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
@@ -61,4 +61,5 @@ async def custom_swagger_ui_html():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    # uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
