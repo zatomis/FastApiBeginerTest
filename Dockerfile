@@ -5,4 +5,4 @@ RUN pip install -r requirments.txt
 
 COPY . .
 
-CMD ["python", "src/main.py"]
+CMD alembic upgrade head; python src/main.py
