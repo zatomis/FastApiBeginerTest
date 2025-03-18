@@ -157,7 +157,8 @@ async def create_room(
             for f_id in room_data.facilities_ids
         ]
 
-        await db.rooms_facilities.add_bulk(rooms_facilities)
+        if rooms_facilities:
+            await db.rooms_facilities.add_bulk(rooms_facilities)
         await db.commit()
         return {"status": "OK", "data": rooms_facilities}
     except IntegrityError:

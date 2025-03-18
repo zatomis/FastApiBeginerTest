@@ -30,6 +30,19 @@ docker run --name booking_celery_beat \
     --network=myNetwork \
     booking_image \
     celery --app=src.tasks.celery_app:celery_app_task_instance worker -l INFO -B
- 
+
+[//]: # ( это локально)
+docker run --name booking_nginx \
+    --volume ./nginx.conf:/etc/nginx/nginx.conf \
+    --network=myNetwork \
+    --rm -p 80:80 nginx 
+
+[//]: # ( это на сервере)
+docker run --name booking_nginx \
+    --volume ./nginx.conf:/etc/nginx/nginx.conf \
+    --network=myNetwork \
+    -d -p 80:80 nginx 
+
+
 
 docker build -t booking_image .
