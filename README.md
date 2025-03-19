@@ -37,11 +37,13 @@ docker run --name booking_nginx \
     --network=myNetwork \
     --rm -p 80:80 nginx 
 
-[//]: # ( это на сервере)
+[//]: # ( это на сервере + прокинуть папку с сертификатом)
 docker run --name booking_nginx \
     --volume ./nginx.conf:/etc/nginx/nginx.conf \
+    --volume /etc/letsencrypt:/etc/letsencrypt \
+    --volume /var/letsencrypt:/var/letsencrypt \
     --network=myNetwork \
-    -d -p 80:80 nginx 
+    -d -p 80:80 -p 443:443 nginx 
 
 
 

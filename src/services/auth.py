@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 import jwt
 from src.exceptions import IncorrectTokenException, EmailNotRegisteredException, IncorrectPasswordException, \
-    ObjectAlreadyExistsException, UserAlreadyExistsException
+    ObjectAlreadyExistsException, UserAlreadyExistsException, PasswordNotNullException
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.config import settings
 from src.services.base import BaseServiceLayer
@@ -55,6 +55,8 @@ class AuthService(BaseServiceLayer):
         user = await self.db.users.get_user_hash_pwd(email=data.email)
         if not user:
             raise EmailNotRegisteredException
+        if not user.password:
+            raise PasswordNotNullException
         # проверим пароль юзера
         if not self.verify_password(data.password, user.password):
             raise IncorrectPasswordException

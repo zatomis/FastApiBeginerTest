@@ -79,6 +79,8 @@ class IncorrectTokenException(NabronirovalException):
 class EmailNotRegisteredException(NabronirovalException):
     detail = "Пользователь с таким email не зарегистрирован"
 
+class PasswordNotNullException(NabronirovalException):
+    detail = "Пароль не может быть пустым"
 
 class IncorrectPasswordException(NabronirovalException):
     detail = "Пароль неверный"
