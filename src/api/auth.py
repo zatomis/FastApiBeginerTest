@@ -5,7 +5,7 @@ from src.schemas.users import UserRequestAdd
 from src.services.auth import AuthService
 from src.exceptions import IncorrectPasswordHTTPException, IncorrectPasswordException, \
     EmailNotRegisteredHTTPException, EmailNotRegisteredException, UserAlreadyExistsException, \
-    UserEmailAlreadyExistsHTTPException
+    UserEmailAlreadyExistsHTTPException, PasswordEmptyException
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
@@ -14,6 +14,8 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 async def register_user(data: UserRequestAdd, db: DBDep):
     try:
         await AuthService(db).register_user(data)
+    except PasswordEmptyException:
+        raise IncorrectPasswordHTTPException
     except UserAlreadyExistsException:
         raise UserEmailAlreadyExistsHTTPException
     return {"status": "OK"}
@@ -50,4 +52,5 @@ async def get_me(user_id: UserIdDep, db: DBDep):
 async def logout(response: Response,):
     response = RedirectResponse("/logout", status_code=302)
     response.delete_cookie(key="access_token")
-    return response
+    return {"status": "OK"}
+

@@ -1,11 +1,13 @@
 from datetime import date
+from sys import exception
+
 from fastapi import APIRouter, Body, Query
 from sqlalchemy.exc import IntegrityError
 from fastapi import Response
 from fastapi import HTTPException
 from src.api.dependencies import DBDep
 from src.exceptions import check_date_to_after_date_from, HotelNotFoundHTTPException, ObjectNotFoundException, \
-    ObjectAlreadyExistsException, RoomNotFoundHTTPException
+    ObjectAlreadyExistsException, RoomNotFoundHTTPException, RoomBadParameterHTTPException, EmptyValueException
 from src.schemas.facilities import RoomFaclityAdd
 from src.schemas.rooms import (
     RoomPatch,
@@ -75,6 +77,24 @@ async def delete_room_in_hotel(hotel_id: int, room_id: int, db: DBDep):
 async def put_room_in_hotel(
     hotel_id: int, room_id: int, db: DBDep, room_data: RoomAddRequest
 ):  # room_data: RoomAddRequest - чтобы не трогать id
+
+    try:
+        if not await db.rooms.get_filter(id=room_id, hotel_id=hotel_id):
+            raise ObjectNotFoundException
+
+        room_data.title = room_data.title.strip()
+        if len(room_data.title) == 0:
+            raise RoomBadParameterHTTPException
+
+        if room_data.price <= 0 or room_data.quantity <= 0:
+            raise RoomBadParameterHTTPException
+
+        if not room_data.facilities_ids:
+            raise RoomBadParameterHTTPException
+
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Номер отеля или номер комнаты не найдены")
+
     try:
         await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
@@ -103,6 +123,24 @@ async def put_room_in_hotel(
 async def patch_room(
     hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatchWithFacilities
 ):
+    try:
+        if not await db.rooms.get_filter(id=room_id, hotel_id=hotel_id):
+            raise ObjectNotFoundException
+
+        room_data.title = room_data.title.strip()
+        if len(room_data.title) == 0:
+            raise RoomBadParameterHTTPException
+
+        if room_data.price <= 0 or room_data.quantity <= 0:
+            raise RoomBadParameterHTTPException
+
+        if not room_data.facilities_ids:
+            raise RoomBadParameterHTTPException
+
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Номер отеля или номер комнаты не найдены")
+
+
     try:
         await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
@@ -137,6 +175,16 @@ async def create_room(
     hotel_id: int, db: DBDep, room_data: RoomAddRequest = Body()
 ):
     try:
+        room_data.title = room_data.title.strip()
+        if len(room_data.title) == 0:
+            raise RoomBadParameterHTTPException
+
+        if room_data.price <= 0 or room_data.quantity <= 0:
+            raise RoomBadParameterHTTPException
+
+        if not room_data.facilities_ids:
+            raise RoomBadParameterHTTPException
+
         _room_data = RoomAdd(
             hotel_id=hotel_id,
             **room_data.model_dump(exclude={"facilities_ids"}),

@@ -35,8 +35,15 @@ async def get_facilities(db: DBDep):
     summary="Добавить удобства для номеров",
     description="<H1>Добавить удобства для номеров</H1>",
 )
+
 async def create_facility(db: DBDep, faclities_data: FaclitiesAdd = Body()):
-    faclities = await db.facilities.add(faclities_data)
-    await db.commit()
-    test_task.delay()
-    return {"status": "OK", "data": faclities}
+    #проверка на дубликат
+    faclities_data.title = faclities_data.title.strip()
+    new_facilities = await db.facilities.get_filter(title=faclities_data.title)
+    if not new_facilities:
+        facilities = await db.facilities.add(faclities_data)
+        await db.commit()
+        test_task.delay()
+        return {"status": "OK", "data": facilities}
+    else:
+        return {"status": "Данные не могут быть пустые"}

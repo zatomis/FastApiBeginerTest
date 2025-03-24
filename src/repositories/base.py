@@ -62,6 +62,9 @@ class BaseRepository:
         )  # каждую схемку -> в словарик
         await self.session.execute(add_bulk_statement)
 
+
+
+
     async def add(self, data: BaseModel):
         try:
             add_statement = (
