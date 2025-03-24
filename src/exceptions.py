@@ -17,6 +17,10 @@ class ObjectAlreadyExistsException(NabronirovalException):
     detail = "Такой объект уже существует"
 
 
+class EmptyValueException(NabronirovalException):
+    detail = "Данные являются пустыми"
+
+
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
     if date_to <= date_from:
         raise HTTPException(status_code=422, detail="Дата заезда не может быть позже даты выезда")
@@ -37,6 +41,11 @@ class HotelNotFoundHTTPException(NabronirovalHTTPException):
 class RoomNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404
     detail = "Номер не найден"
+
+
+class RoomBadParameterHTTPException(NabronirovalHTTPException):
+    status_code = 406
+    detail = "Не верные переданные данные"
 
 
 class AllRoomsAreBookedHTTPException(NabronirovalHTTPException):
@@ -81,11 +90,15 @@ class EmailNotRegisteredException(NabronirovalException):
 
 
 class IncorrectPasswordException(NabronirovalException):
-    detail = "Пароль неверный"
+    detail = "Пароль неверный либо пустой"
 
 
 class UserAlreadyExistsException(NabronirovalException):
     detail = "Пользователь уже существует"
+
+
+class PasswordEmptyException(NabronirovalException):
+    detail = "Пароль не может быть пустым"
 
 
 class RoomNotFoundException(NabronirovalException):

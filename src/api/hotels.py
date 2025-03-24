@@ -19,9 +19,13 @@ async def put_hotel(
     hotel_data: HotelAdd,
     db: DBDep,
 ):
-    await db.hotels.edit(hotel_data, id=hotel_id)
-    await db.commit()
-    return {"status": "OK"}
+    try:
+        if await db.hotels.get_one(id=hotel_id):
+            await db.hotels.edit(hotel_data, id=hotel_id)
+            await db.commit()
+            return {"status": "OK"}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.patch(
@@ -30,9 +34,13 @@ async def put_hotel(
     description="<H1>Обновить данные об объекте</H1>",
 )
 async def patch_hotel(hotel_id: int, hotel_data: HotelPatch, db: DBDep):
-    await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
-    await db.commit()
-    return {"status": "OK"}
+    try:
+        if await db.hotels.get_one(id=hotel_id):
+            await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
+            await db.commit()
+            return {"status": "OK"}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.delete(
@@ -41,9 +49,13 @@ async def patch_hotel(hotel_id: int, hotel_data: HotelPatch, db: DBDep):
     description="<H1>Удалить данные об объекте</H1>",
 )
 async def delete_hotel(hotel_id: int, db: DBDep):
-    await db.hotels.remove(id=hotel_id)
-    await db.commit()
-    return {"status": "OK"}
+    try:
+        if await db.hotels.get_one(id=hotel_id):
+            await db.hotels.remove(id=hotel_id)
+            await db.commit()
+            return {"status": "OK"}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.get(
@@ -57,7 +69,6 @@ async def get_by_id(hotel_id: int, db: DBDep):
         return await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
         raise HotelNotFoundHTTPException
-    return {"status": hotel}
 
 
 @router.get(
@@ -109,6 +120,14 @@ async def create_hotel(
         }
     ),
 ):
-    hotel = await db.hotels.add(hotel_data)
-    await db.commit()
-    return {"status": "OK", "data": hotel}
+    hotel_data.title = hotel_data.title.strip()
+    hotel_data.location = hotel_data.location.strip()
+    if hotel_data.title != '' and hotel_data.location != '':
+        if not await db.hotels.get_filter(title=hotel_data.title, location=hotel_data.location):
+            hotel = await db.hotels.add(hotel_data)
+            await db.commit()
+            return {"status": "OK", "data": hotel}
+        else:
+            return {"status": "Такой отель уже есть"}
+    else:
+        return {"status": 'Название или местоположение не должны быть пустые! '}

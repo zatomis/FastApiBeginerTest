@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 import jwt
 from src.exceptions import IncorrectTokenException, EmailNotRegisteredException, IncorrectPasswordException, \
-    ObjectAlreadyExistsException, UserAlreadyExistsException
+    ObjectAlreadyExistsException, UserAlreadyExistsException, PasswordEmptyException, EmptyValueException
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.config import settings
 from src.services.base import BaseServiceLayer
@@ -42,8 +42,18 @@ class AuthService(BaseServiceLayer):
 
 
     async def register_user(self, data: UserRequestAdd):
-        hashed_password = self.hash_password(data.password)
-        new_user_data = UserAdd(email=data.email, password=hashed_password, name=data.name)
+        try:
+            if data.password != '':
+                hashed_password = self.hash_password(data.password)
+            else:
+                raise EmptyValueException
+        except EmptyValueException as ex:
+            raise PasswordEmptyException
+
+        # hashed_password = self.hash_password(data.password)
+
+        # new_user_data = UserAdd(email=data.email, password=hashed_password, name=data.name)
+        new_user_data = UserAdd(email=data.email, password=hashed_password, name='')
         try:
             await self.db.users.add(new_user_data)
             await self.db.commit()

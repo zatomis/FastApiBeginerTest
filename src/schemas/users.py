@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 class UserRequestAdd(BaseModel):
     email: EmailStr
     password: str
-    name: str
+    # name: str
 
 
 class UserAdd(BaseModel):
