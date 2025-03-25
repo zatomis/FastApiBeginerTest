@@ -37,6 +37,10 @@ class HotelNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404
     detail = "Отель не найден"
 
+class FacilityNotFoundHTTPException(NabronirovalHTTPException):
+    status_code = 404
+    detail = "Удобства не найдены"
+
 
 class RoomNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404

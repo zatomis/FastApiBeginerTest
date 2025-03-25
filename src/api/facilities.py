@@ -1,9 +1,12 @@
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body
 from src.api.dependencies import DBDep
+from src.exceptions import ObjectNotFoundException, FacilityNotFoundHTTPException, IncorrectPasswordException
 from src.schemas.facilities import FaclitiesAdd
 from src.services.facilities import FacilityServiceLayer
 from src.tasks.task import test_task
+from redis.exceptions import ConnectionError
+
 
 router = APIRouter(prefix="/facilities", tags=["Удобства 🚽"])
 
@@ -47,3 +50,21 @@ async def create_facility(db: DBDep, faclities_data: FaclitiesAdd = Body()):
         return {"status": "OK", "data": facilities}
     else:
         return {"status": "Данные не могут быть пустые"}
+
+
+@router.delete(
+    "/{facility_id}",
+    summary="Удаление",
+    description="<H1>Удалить данные об удобствах</H1>",
+)
+@cache(expire=30)
+async def delete_facility(facility_id: int, db: DBDep):
+    try:
+        if await db.facilities.get_one(id=facility_id):
+            await db.facilities.remove(id=facility_id)
+            await db.commit()
+            return {"status": "OK"}
+    except ObjectNotFoundException:
+        raise FacilityNotFoundHTTPException
+    except ConnectionError:
+        raise IncorrectPasswordException
