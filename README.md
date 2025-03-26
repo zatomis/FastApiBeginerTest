@@ -1,6 +1,5 @@
 docker network create myNetwork
  
-
 docker run --name booking_db \
     -p 6432:5432 \
     -e POSTGRES_USER=user_pg \
@@ -14,7 +13,6 @@ docker run --name booking_cache \
     -p 7379:6379 \
     --network=myNetwork \
     -d redis:7.4
-
 
 docker run --name booking_back \
     -p 7777:8000 \
@@ -45,6 +43,35 @@ docker run --name booking_nginx \
     --network=myNetwork \
     -d -p 80:80 -p 443:443 nginx 
 
+------------------------------------------------------------
 
 
 docker build -t booking_image .
+------------------------------------------------------------
+
+git remote add gitlab git@gitlab.com:zatomis/booking.git 
+git push --all gitlab
+------------------------------------------------------------
+Gitlab Runner  Запуск раннера
+https://habr.com/ru/articles/764568
+
+docker run -d --name gitlab-runner --restart always \
+  -v /srv/gitlab-runner/config:/etc/gitlab-runner \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  gitlab/gitlab-runner:alpine
+
+Регистрация раннера
+
+docker run --rm -it \
+    -v /srv/gitlab-runner/config:/etc/gitlab-runner \
+    gitlab/gitlab-runner:alpine register
+
+Изменение конфига
+Шаг 1
+Заходим в режим редактирования конфига через
+micro /srv/gitlab-runner/config/config.toml
+
+Шаг 2
+Меняем
+volumes = ["/cache"] на
+volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
