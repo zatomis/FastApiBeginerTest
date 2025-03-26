@@ -10,5 +10,6 @@ build-job:
 
 deploy-job:
   stage: deploy
+  script:
     - echo "Deploying application..."
     - docker compose up -d
