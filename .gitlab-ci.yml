@@ -13,8 +13,8 @@ build-job:
 
 deploy-job:
   stage: deploy
-  before_script:
-    - docker rm -f booking_back booking_celery_worker booking_celery_beat
+#  before_script:
+#    - docker rm -f booking_back booking_celery_worker booking_celery_beat
   script:
     - echo "Deploying application..."
     - docker compose -f docker-compose-ci.yml up -d
