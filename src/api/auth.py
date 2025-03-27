@@ -43,7 +43,8 @@ async def get_access_token(request):
     return access_token
 
 
-@router.get("/me")
+
+@router.get("/me", summary="Мои данные")
 async def get_me(user_id: UserIdDep, db: DBDep):
     return await AuthService(db).get_one_or_none_user(user_id)
 
