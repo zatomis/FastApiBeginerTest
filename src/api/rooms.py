@@ -1,13 +1,12 @@
 from datetime import date
-from sys import exception
 
 from fastapi import APIRouter, Body, Query
 from sqlalchemy.exc import IntegrityError
 from fastapi import Response
 from fastapi import HTTPException
 from src.api.dependencies import DBDep
-from src.exceptions import check_date_to_after_date_from, HotelNotFoundHTTPException, ObjectNotFoundException, \
-    ObjectAlreadyExistsException, RoomNotFoundHTTPException, RoomBadParameterHTTPException, EmptyValueException
+from src.exceptions import HotelNotFoundHTTPException, ObjectNotFoundException, \
+    ObjectAlreadyExistsException, RoomNotFoundHTTPException, RoomBadParameterHTTPException
 from src.schemas.facilities import RoomFaclityAdd
 from src.schemas.rooms import (
     RoomPatch,
