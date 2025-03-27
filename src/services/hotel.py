@@ -4,15 +4,16 @@ from src.api.dependencies import PaginationParamsDep
 from src.exceptions import check_date_to_after_date_from
 from src.services.base import BaseServiceLayer
 
+
 # выносим в этот класс методы из api
 class HotelServiceLayer(BaseServiceLayer):
     async def get_filter_by_time(
-            self,
-            paginations: PaginationParamsDep,  # прокинуть в зависимости 2-а параметра page per_page
-            location: str | None,
-            title: str | None,
-            date_from: date,
-            date_to: date,
+        self,
+        paginations: PaginationParamsDep,  # прокинуть в зависимости 2-а параметра page per_page
+        location: str | None,
+        title: str | None,
+        date_from: date,
+        date_to: date,
     ):
         check_date_to_after_date_from(date_from, date_to)
         per_page = paginations.per_page or 3

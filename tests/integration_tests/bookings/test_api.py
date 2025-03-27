@@ -16,7 +16,12 @@ from tests.conftest import get_db_null_pull
     ],
 )
 async def test_add_booking(
-    room_id, date_from, date_to, status_code, db: DBManager, autheticated_user_ac: AsyncClient
+    room_id,
+    date_from,
+    date_to,
+    status_code,
+    db: DBManager,
+    autheticated_user_ac: AsyncClient,
 ):
     response = await autheticated_user_ac.post(
         "/bookings/",

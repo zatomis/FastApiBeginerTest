@@ -5,8 +5,13 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import Response
 from fastapi import HTTPException
 from src.api.dependencies import DBDep
-from src.exceptions import HotelNotFoundHTTPException, ObjectNotFoundException, \
-    ObjectAlreadyExistsException, RoomNotFoundHTTPException, RoomBadParameterHTTPException
+from src.exceptions import (
+    HotelNotFoundHTTPException,
+    ObjectNotFoundException,
+    ObjectAlreadyExistsException,
+    RoomNotFoundHTTPException,
+    RoomBadParameterHTTPException,
+)
 from src.schemas.facilities import RoomFaclityAdd
 from src.schemas.rooms import (
     RoomPatch,
@@ -76,7 +81,6 @@ async def delete_room_in_hotel(hotel_id: int, room_id: int, db: DBDep):
 async def put_room_in_hotel(
     hotel_id: int, room_id: int, db: DBDep, room_data: RoomAddRequest
 ):  # room_data: RoomAddRequest - чтобы не трогать id
-
     try:
         if not await db.rooms.get_filter(id=room_id, hotel_id=hotel_id):
             raise ObjectNotFoundException
@@ -92,7 +96,9 @@ async def put_room_in_hotel(
             raise RoomBadParameterHTTPException
 
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Номер отеля или номер комнаты не найдены")
+        raise HTTPException(
+            status_code=404, detail="Номер отеля или номер комнаты не найдены"
+        )
 
     try:
         await db.hotels.get_one(id=hotel_id)
@@ -137,8 +143,9 @@ async def patch_room(
             raise RoomBadParameterHTTPException
 
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Номер отеля или номер комнаты не найдены")
-
+        raise HTTPException(
+            status_code=404, detail="Номер отеля или номер комнаты не найдены"
+        )
 
     try:
         await db.hotels.get_one(id=hotel_id)

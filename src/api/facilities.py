@@ -1,7 +1,11 @@
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body
 from src.api.dependencies import DBDep
-from src.exceptions import ObjectNotFoundException, FacilityNotFoundHTTPException, IncorrectPasswordException
+from src.exceptions import (
+    ObjectNotFoundException,
+    FacilityNotFoundHTTPException,
+    IncorrectPasswordException,
+)
 from src.schemas.facilities import FaclitiesAdd
 from src.services.facilities import FacilityServiceLayer
 from src.tasks.task import test_task
@@ -38,9 +42,8 @@ async def get_facilities(db: DBDep):
     summary="Добавить удобства для номеров",
     description="<H1>Добавить удобства для номеров</H1>",
 )
-
 async def create_facility(db: DBDep, faclities_data: FaclitiesAdd = Body()):
-    #проверка на дубликат
+    # проверка на дубликат
     faclities_data.title = faclities_data.title.strip()
     new_facilities = await db.facilities.get_filter(title=faclities_data.title)
     if not new_facilities:

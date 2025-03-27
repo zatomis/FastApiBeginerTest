@@ -90,10 +90,9 @@ async def get_hotels(
         location=location,
         title=title,
         date_from=date_from,
-        date_to=date_to
+        date_to=date_to,
     )
     return {"status": "OK", "data": hotel}
-
 
 
 @router.post(
@@ -122,12 +121,14 @@ async def create_hotel(
 ):
     hotel_data.title = hotel_data.title.strip()
     hotel_data.location = hotel_data.location.strip()
-    if hotel_data.title != '' and hotel_data.location != '':
-        if not await db.hotels.get_filter(title=hotel_data.title, location=hotel_data.location):
+    if hotel_data.title != "" and hotel_data.location != "":
+        if not await db.hotels.get_filter(
+            title=hotel_data.title, location=hotel_data.location
+        ):
             hotel = await db.hotels.add(hotel_data)
             await db.commit()
             return {"status": "OK", "data": hotel}
         else:
             return {"status": "Такой отель уже есть"}
     else:
-        return {"status": 'Название или местоположение не должны быть пустые! '}
+        return {"status": "Название или местоположение не должны быть пустые! "}

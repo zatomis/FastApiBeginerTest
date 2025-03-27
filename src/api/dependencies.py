@@ -7,7 +7,11 @@ from typing import (
 from src.database import new_async_session_maker
 from src.services.auth import AuthService
 from src.utils.db_manager import DBManager
-from src.exceptions import IncorrectTokenException, IncorrectTokenHTTPException, NoAccessTokenHTTPException
+from src.exceptions import (
+    IncorrectTokenException,
+    IncorrectTokenHTTPException,
+    NoAccessTokenHTTPException,
+)
 
 
 # перетаскивание из pydantic схем - в query параметры

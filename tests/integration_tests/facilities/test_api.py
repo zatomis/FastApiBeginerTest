@@ -7,7 +7,6 @@ async def test_get_facilities(ac: AsyncClient):
     assert isinstance(response.json(), list)
 
 
-
 async def test_post_facilities(ac: AsyncClient):
     facility_title = "Личный водитель"
     response = await ac.post("/facilities/", json={"title": facility_title})

@@ -33,7 +33,6 @@ class BaseRepository:
     async def get_all(self, *args, **kwargs):
         return await self.get_filter()
 
-
     async def get_one_or_none(self, **filter_by):
         query_statement = select(self.model).filter_by(**filter_by)
         # print(query_statement.compile(engine, compile_kwargs={"literal_binds": True}))
@@ -42,7 +41,6 @@ class BaseRepository:
         if model is None:
             return None
         return self.schema.model_validate(model, from_attributes=True)
-
 
     async def get_one(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
@@ -53,7 +51,6 @@ class BaseRepository:
             raise ObjectNotFoundException
         return self.schema.model_validate(model, from_attributes=True)
 
-
     async def add_bulk(
         self, data: Sequence[BaseModel]
     ):  # принимаем массив список схем
@@ -62,13 +59,12 @@ class BaseRepository:
         )  # каждую схемку -> в словарик
         await self.session.execute(add_bulk_statement)
 
-
-
-
     async def add(self, data: BaseModel):
         try:
             add_statement = (
-                insert(self.model).values(**data.model_dump()).returning(self.model)
+                insert(self.model)
+                .values(**data.model_dump())
+                .returning(self.model)
             )  # или .returning(self.model.id)-т.е. можно и одно поле
             # print(
             #     add_statement.compile(
@@ -82,7 +78,9 @@ class BaseRepository:
             return self.schema.model_validate(model, from_attributes=True)
         except IntegrityError as ex:
             logging.error(f"{type(ex.orig.__cause__)=}")
-            if isinstance(ex.orig.__cause__, UniqueViolationError): #если классы ошибок совпали-то это именно про уникальность
+            if isinstance(
+                ex.orig.__cause__, UniqueViolationError
+            ):  # если классы ошибок совпали-то это именно про уникальность
                 raise ObjectAlreadyExistsException from ex
             else:
                 logging.error("Незанакомая ошибка", exc_info=ex)

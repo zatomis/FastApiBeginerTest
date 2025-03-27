@@ -3,9 +3,15 @@ from starlette.responses import RedirectResponse
 from src.api.dependencies import UserIdDep, DBDep
 from src.schemas.users import UserRequestAdd
 from src.services.auth import AuthService
-from src.exceptions import IncorrectPasswordHTTPException, IncorrectPasswordException, \
-    EmailNotRegisteredHTTPException, EmailNotRegisteredException, UserAlreadyExistsException, \
-    UserEmailAlreadyExistsHTTPException, PasswordEmptyException
+from src.exceptions import (
+    IncorrectPasswordHTTPException,
+    IncorrectPasswordException,
+    EmailNotRegisteredHTTPException,
+    EmailNotRegisteredException,
+    UserAlreadyExistsException,
+    UserEmailAlreadyExistsHTTPException,
+    PasswordEmptyException,
+)
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
@@ -43,15 +49,15 @@ async def get_access_token(request):
     return access_token
 
 
-
 @router.get("/me", summary="Мои данные")
 async def get_me(user_id: UserIdDep, db: DBDep):
     return await AuthService(db).get_one_or_none_user(user_id)
 
 
 @router.get("/logout")
-async def logout(response: Response,):
+async def logout(
+    response: Response,
+):
     response = RedirectResponse("/logout", status_code=302)
     response.delete_cookie(key="access_token")
     return {"status": "OK"}
-

@@ -5,6 +5,7 @@ from fastapi import HTTPException
 
 class NabronirovalException(Exception):
     detail = "Неожиданная ошибка"
+
     def __init__(self, *args, **kwargs):
         super().__init__(self.detail, *args, **kwargs)
 
@@ -23,12 +24,16 @@ class EmptyValueException(NabronirovalException):
 
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
     if date_to <= date_from:
-        raise HTTPException(status_code=422, detail="Дата заезда не может быть позже даты выезда")
+        raise HTTPException(
+            status_code=422,
+            detail="Дата заезда не может быть позже даты выезда",
+        )
 
 
 class NabronirovalHTTPException(HTTPException):
     status_code = 500
     detail = None
+
     def __init__(self):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
@@ -36,6 +41,7 @@ class NabronirovalHTTPException(HTTPException):
 class HotelNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404
     detail = "Отель не найден"
+
 
 class FacilityNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404
@@ -92,8 +98,10 @@ class IncorrectTokenException(NabronirovalException):
 class EmailNotRegisteredException(NabronirovalException):
     detail = "Пользователь с таким email не зарегистрирован"
 
+
 class PasswordNotNullException(NabronirovalException):
     detail = "Пароль не может быть пустым"
+
 
 class IncorrectPasswordException(NabronirovalException):
     detail = "Пароль неверный либо пустой"
@@ -113,4 +121,3 @@ class RoomNotFoundException(NabronirovalException):
 
 class HotelNotFoundException(NabronirovalException):
     detail = "Отель не найден"
-

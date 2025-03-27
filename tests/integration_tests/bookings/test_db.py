@@ -38,13 +38,17 @@ async def test_crud_booking(db: DBManager):
 
     await db.bookings.edit(update_booking_data, id=new_booking.id)
 
-    updated_booking: Booking | None = await db.bookings.get_one_or_none(id=new_booking.id)
+    updated_booking: Booking | None = await db.bookings.get_one_or_none(
+        id=new_booking.id
+    )
     assert updated_booking
     assert updated_booking.id == new_booking.id
     assert updated_booking.date_to == updated_date
     # удалить бронь
     await db.bookings.remove(id=new_booking.id)
-    booking: Booking | None = await db.bookings.get_one_or_none(id=new_booking.id)
+    booking: Booking | None = await db.bookings.get_one_or_none(
+        id=new_booking.id
+    )
     assert not booking
 
     await db.commit()

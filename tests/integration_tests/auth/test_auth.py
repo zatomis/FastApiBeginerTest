@@ -14,7 +14,9 @@ from httpx import AsyncClient
         ("abcde@abc", "1235", 422),
     ],
 )
-async def test_auth_flow(email: str, password: str, status_code: int, ac: AsyncClient):
+async def test_auth_flow(
+    email: str, password: str, status_code: int, ac: AsyncClient
+):
     resp_register_user = await ac.post(
         "/auth/register",
         json={
