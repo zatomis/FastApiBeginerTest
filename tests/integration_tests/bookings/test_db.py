@@ -7,7 +7,7 @@ from src.utils.db_manager import DBManager
 # и тогда функция ниже - уже будет внутри контекстного менеджера
 async def test_crud_booking(db: DBManager):
     # Считаем кол-во данных до теста
-    await db.bookings.get_one_or_none()
+    # await db.bookings.get_one_or_none()
 
     # взять данные для теста из БД
     user = (await db.users.get_all())[0]  # type: ignore
